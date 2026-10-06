@@ -13,11 +13,11 @@ Last updated 2026-10-06. Keep this file current: tick items off and add new find
   - Custom Domain attached to the Worker (Production only, no subdomain).
   - Let's Encrypt certificate.
   - Some DNS caches still pointed at the old WordPress server (46.202.158.123) for a while; those responses have no `cf-ray` header. Keep the old hosting running for a day or two until that clears.
-  - `www.galfrank.com` doesn't exist yet (see section 1, step 4).
+  - `www.galfrank.com`: proxied A record plus a 301 redirect to the root, with Always Use HTTPS on (set up 2026-10-06). DNS is verified. The redirect itself is untested from the cloud sandbox, which blocks www and plain http.
 - Netlify is not used. Ignore older notes that mention Netlify or Netlify Forms.
 - Done so far (PR #1, merged): headline invisible on phones (`fitHeadline()` measured a `display: contents` wrapper); repo files publicly downloadable on Cloudflare; Cloudflare PR preview builds failing.
 
-## 1. Domain move (steps 1–3 done 2026-10-06; www still to do)
+## 1. Domain move (done 2026-10-06)
 
 1. Save anything worth keeping from the old WordPress site (texts, images). It stops being visible on galfrank.com after the switch.
 2. Cloudflare dashboard → add the domain `galfrank.com` (Free plan) → check the imported DNS records → at the registrar where the domain was bought, replace the nameservers with the two Cloudflare shows → wait until Cloudflare says the domain is **Active**.
