@@ -1,0 +1,15 @@
+// Cloudflare Workers config: serves the repo root as a static site.
+// "name" must match the Worker name in the Cloudflare dashboard or the build fails.
+// Files listed in .assetsignore are never published.
+{
+  "name": "galfrankstudio-website",
+  "compatibility_date": "2026-10-01",
+  "observability": {
+    "enabled": true
+  },
+  "assets": {
+    "directory": "."
+  },
+  // Required by the pull-request preview builds (`wrangler preview`); empty = same settings as production.
+  "previews": {}
+}

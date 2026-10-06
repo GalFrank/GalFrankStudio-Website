@@ -1,0 +1,13 @@
+# Files Cloudflare must NOT publish (same format as .gitignore).
+# The site is index.html plus whatever it links to; everything below is repo plumbing.
+.git
+.github
+.gitignore
+.assetsignore
+.claude
+.wrangler
+node_modules
+wrangler.jsonc
+wrangler.toml
+README.md
+CLAUDE.md
