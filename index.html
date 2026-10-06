@@ -234,6 +234,7 @@ textarea { min-height: 130px; resize: vertical; }
 .done h3 { font-family: var(--display); font-size: 2.6rem; line-height: 1; }
 .done .ok { color: var(--ok); font-family: var(--mono); font-size: 12px; letter-spacing: .1em; }
 .done p { margin: 0; color: var(--muted); }
+.done .why { font-size: 11px; letter-spacing: .02em; overflow-wrap: anywhere; opacity: .85; }
 .done .row { display: flex; flex-wrap: wrap; gap: 10px; }
 
 /* footer */
@@ -778,6 +779,7 @@ body.menu-open .wa-fab, body.menu-open .cur { display: none; }
           <span class="ok mono" id="doneTag">✓ READY</span>
           <h3 id="doneTitle" tabindex="-1"></h3>
           <p id="doneText"></p>
+          <p class="why mono" id="doneWhy" hidden></p>
           <div class="row" id="doneRow"></div>
         </div>
       </div>
@@ -858,7 +860,7 @@ const T = {
     "f.send": "שליחה", "f.note": "הפרטים משמשים רק כדי לחזור אליכם.",
     "e.name": "נא למלא שם", "e.phone": "נא למלא מספר טלפון כדי שנוכל לחזור אליכם", "e.email": "כתובת האימייל לא תקינה", "e.msg": "ספרו לנו במשפט או שניים על הפרויקט",
     "done.wa.title": "כמעט שם", "done.wa.text": "הפרטים מוכנים. לחצו כדי לשלוח אותם בוואטסאפ ונחזור אליכם.", "done.wa.btn": "שליחה בוואטסאפ",
-    "done.ok.title": "ההודעה התקבלה", "done.ok.text": "תודה! נחזור אליכם בהקדם.", "done.again": "שליחת פנייה נוספת",
+    "done.ok.title": "נשלח!", "done.ok.text": "תודה! הפנייה התקבלה ונחזור אליכם בהקדם. רוצים תשובה מהירה יותר? אפשר לשלוח את הפרטים גם בוואטסאפ.", "done.ok.wa": "שליחה גם בוואטסאפ", "done.again": "שליחת פנייה נוספת",
     "d.wa": "וואטסאפ", "d.email": "אימייל", "d.ig": "אינסטגרם", "copy": "העתקה", "copied": "הועתק",
     "footer.copy": "© 2026 גל פרנק סטודיו",
     "reel.sound": "צפו עם סאונד", "reel.watch": "צפייה בשואוריל 2026 עם סאונד", "reel.pause": "השהיה", "reel.resume": "המשך ניגון", "reel.unmute": "הפעלת סאונד", "reel.mute": "השתקה", "reel.fs": "מסך מלא", "reel.ruler": "ציר הזמן של השואוריל",
@@ -902,7 +904,7 @@ const T = {
     "f.send": "Send", "f.note": "We only use your details to reply to you.",
     "e.name": "Please enter your name", "e.phone": "Add a phone number so we can call you back", "e.email": "That email address doesn't look right", "e.msg": "Tell us about the project in a sentence or two",
     "done.wa.title": "Almost there", "done.wa.text": "Your details are ready. Tap below to send them on WhatsApp and we'll reply.", "done.wa.btn": "Send on WhatsApp",
-    "done.ok.title": "Message received", "done.ok.text": "Thanks! We'll get back to you soon.", "done.again": "Send another inquiry",
+    "done.ok.title": "Done!", "done.ok.text": "Thanks! Your inquiry is in and we'll get back to you soon. Want a faster reply? Send the same details on WhatsApp too.", "done.ok.wa": "Also send on WhatsApp", "done.again": "Send another inquiry",
     "d.wa": "WhatsApp", "d.email": "Email", "d.ig": "Instagram", "copy": "Copy", "copied": "Copied",
     "footer.copy": "© 2026 Gal Frank Studio",
     "reel.sound": "Watch with sound", "reel.watch": "Watch Showreel 2026 with sound", "reel.pause": "Pause", "reel.resume": "Play", "reel.unmute": "Sound on", "reel.mute": "Mute", "reel.fs": "Full screen", "reel.ruler": "Showreel timeline",
@@ -1254,14 +1256,20 @@ function bad(k) { $("#e-" + k).textContent = t("e." + k); $("#e-" + k).parentEle
 let formShownAt = performance.now(), doneKind = null, lastSummary = "";
 
 /* true only when the site's Worker confirms the email went out ({ ok: true }) */
+/* why the last send failed; shown under the failure panel on the workers.dev test addresses only, never on galfrank.com */
+const TEST_HOST = /\.workers\.dev$|^(127\.0\.0\.1|localhost)$/.test(location.hostname);
+let sendWhy = "";
 async function sendLead(payload) {
-  if (!CONFIG.formEndpoint) return false;
+  sendWhy = "";
+  if (!CONFIG.formEndpoint) { sendWhy = "no endpoint"; return false; }
   const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 12000);
   try {
     const r = await fetch(CONFIG.formEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload), signal: ctl.signal });
-    const j = r.ok ? await r.json().catch(() => null) : null;
-    return !!(j && j.ok === true);
-  } catch (err) { return false; } finally { clearTimeout(timer); }
+    const j = await r.json().catch(() => null);
+    if (r.ok && j && j.ok === true) return true;
+    sendWhy = "HTTP " + r.status + (j ? " · " + [j.error, j.code, j.detail, (j.missing || []).join(" + ")].filter(Boolean).join(" · ") : "");
+    return false;
+  } catch (err) { sendWhy = err && err.name === "AbortError" ? "timeout" : "network error"; return false; } finally { clearTimeout(timer); }
 }
 
 async function onSubmit(e) {
@@ -1298,7 +1306,10 @@ function renderDone() {
   $("#doneTitle").textContent = t(ok ? "done.ok.title" : "done.wa.title");
   $("#doneText").textContent = t(ok ? "done.ok.text" : "done.wa.text");
   $("#doneTag").textContent = ok ? "✓ SENT" : "✓ READY";
-  $("#doneRow").innerHTML = (ok ? "" : '<a class="btn btn-primary" target="_blank" rel="noopener" href="' + esc(waLink(lastSummary)) + '">' + t("done.wa.btn") + "</a>") +
+  $("#doneWhy").hidden = ok || !TEST_HOST || !sendWhy;
+  $("#doneWhy").textContent = "test info: " + sendWhy;
+  /* both outcomes offer WhatsApp with the same details: optional after the email went out, the way to send them when it didn't */
+  $("#doneRow").innerHTML = '<a class="btn btn-primary" target="_blank" rel="noopener" href="' + esc(waLink(lastSummary)) + '">' + t(ok ? "done.ok.wa" : "done.wa.btn") + "</a>" +
     '<button class="btn btn-ghost" type="button" id="again">' + t("done.again") + "</button>";
   $("#again").onclick = () => { $("#form").reset(); doneKind = null; $("#done").hidden = true; $("#form").hidden = false; formShownAt = performance.now(); $("#f-name").focus(); };
 }
