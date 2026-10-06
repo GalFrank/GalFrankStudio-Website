@@ -9,5 +9,7 @@
   },
   "assets": {
     "directory": "."
-  }
+  },
+  // Required by the pull-request preview builds (`wrangler preview`); empty = same settings as production.
+  "previews": {}
 }
