@@ -27,6 +27,9 @@ Last updated 2026-10-06. Keep this file current: tick items off and add new find
     - No autoplay for reduced motion or data saver; falls back to poster + play button if autoplay is refused.
   - Project videos play inside the feature frame instead of a pop-up. The pop-up (lightbox) is gone. One video with sound at a time.
     - YouTube's own controls are off (`controls: 0`) and a click layer covers the player, so YouTube's title bar and buttons don't show. The frame has the site's own small controls instead: play/pause, sound, a progress bar you can drag (or arrow keys, 5 s), time, full screen. They fade out while the video plays and come back when the mouse moves; on phones they stay visible.
+    - **No YouTube interface at all (reel and projects).** Even with `controls: 0`, the 2025+ YouTube embed draws a title bar in the top ~70px of its player and share / "Watch on YouTube" buttons in the bottom ~60px, at every player size (measured inside the real embed). So each player sits in a `.vbox` with the exact shape of the video (`--ar`), and the iframe is 72px taller at each end; those strips are clipped away and the video, which YouTube letterboxes ("contain") during playback, fills the box exactly. Videos that aren't 16:9 need `ar` in `CONFIG.projects` (the FITME short is `"4/5"`); the reel box is 5:4 in CSS.
+    - YouTube's buffering spinner sits in the middle of the player; the site's own spinner badge (dark disc) covers it while buffering.
+    - Still possible: end-screen elements an uploader adds in YouTube Studio (last 5–20 s of a video) draw over the picture. Remove end screens on these videos in YouTube Studio if they show up.
     - Clicking the video pauses it: the frame blurs and dims under a play icon, which also hides YouTube's pause screen.
     - If the browser refuses to start a video with sound (possible on iPhone), after 4 s the frame hands taps straight to YouTube's own play button.
   - The contact form posts to `/api/contact` (`worker/index.js`), which emails the owner. Email sending is switched off until the Gmail address is verified (see 3A); until then the form falls back to WhatsApp.
@@ -70,7 +73,7 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
 - Tests: `node --test` (repo root) runs `tests/worker.test.mjs`.
 
 ### B. Speed and layout jump
-- **Move the images out of index.html.** The base64 portrait is ~72 KB (`<img src="data:image/webp…` in `#portrait`). The `const LOGOS = {…}` block is ~135 KB: 9 single-colour PNG masks plus an Isuzu SVG.
+- **Move the images out of index.html.** Done for the portrait (2026-10-06): the new photo, cut out of its studio background locally, is `img/gal-1000.webp` / `img/gal-600.webp` (67 / 30 KB, `srcset`). Still to do: the `const LOGOS = {…}` block is ~135 KB: 9 single-colour PNG masks plus an Isuzu SVG.
   - Logos as lossless WebP measured 95 KB → 54 KB.
   - CSS `mask-image` needs same-origin URLs: fine on Cloudflare, but it fails when opening the file locally via file://.
 - **Self-host the fonts.** The Google Fonts CSS blocks first paint (~1.5 s on slow mobile). Only Hebrew and Latin subsets are needed:
