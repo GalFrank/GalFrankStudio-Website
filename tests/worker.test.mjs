@@ -64,7 +64,9 @@ test("invalid input is rejected with the failing field", async () => {
 test("without the email binding the form is told to fall back", async () => {
   const res = await worker.fetch(post(good), { CONTACT_TO: "owner@example.com" });
   assert.equal(res.status, 503);
-  assert.equal((await res.json()).ok, false);
+  const body = await res.json();
+  assert.equal(body.ok, false);
+  assert.deepEqual(body.missing, ["EMAIL binding"]);
 });
 
 test("a failed send is reported, not hidden", async () => {
@@ -73,7 +75,9 @@ test("a failed send is reported, not hidden", async () => {
   try {
     const res = await worker.fetch(post(good), env);
     assert.equal(res.status, 502);
-    assert.equal((await res.json()).ok, false);
+    const body = await res.json();
+    assert.equal(body.ok, false);
+    assert.equal(body.code, "E_SENDER_NOT_VERIFIED", "the cause is reported");
   } finally { console.error = orig; }
 });
 

@@ -28,13 +28,14 @@ export default {
     const problem = validate(lead);
     if (problem) return json({ ok: false, error: problem }, 422);
 
-    if (!env.EMAIL || !env.CONTACT_TO) return json({ ok: false, error: "email_not_configured" }, 503);
+    // Say what is missing / what Cloudflare answered, so a failed test shows the cause (no secrets in either).
+    if (!env.EMAIL || !env.CONTACT_TO) return json({ ok: false, error: "email_not_configured", missing: [!env.EMAIL && "EMAIL binding", !env.CONTACT_TO && "CONTACT_TO"].filter(Boolean) }, 503);
     try {
       await env.EMAIL.send(buildEmail(lead, env));
       return json({ ok: true });
     } catch (e) {
       console.error("contact form send failed", e && e.code, e && e.message);
-      return json({ ok: false, error: "send_failed" }, 502);
+      return json({ ok: false, error: "send_failed", code: (e && e.code) || "unknown", detail: String((e && e.message) || "").slice(0, 200) }, 502);
     }
   },
 };

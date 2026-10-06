@@ -234,6 +234,7 @@ textarea { min-height: 130px; resize: vertical; }
 .done h3 { font-family: var(--display); font-size: 2.6rem; line-height: 1; }
 .done .ok { color: var(--ok); font-family: var(--mono); font-size: 12px; letter-spacing: .1em; }
 .done p { margin: 0; color: var(--muted); }
+.done .why { font-size: 11px; letter-spacing: .02em; overflow-wrap: anywhere; opacity: .85; }
 .done .row { display: flex; flex-wrap: wrap; gap: 10px; }
 
 /* footer */
@@ -778,6 +779,7 @@ body.menu-open .wa-fab, body.menu-open .cur { display: none; }
           <span class="ok mono" id="doneTag">✓ READY</span>
           <h3 id="doneTitle" tabindex="-1"></h3>
           <p id="doneText"></p>
+          <p class="why mono" id="doneWhy" hidden></p>
           <div class="row" id="doneRow"></div>
         </div>
       </div>
@@ -1254,14 +1256,20 @@ function bad(k) { $("#e-" + k).textContent = t("e." + k); $("#e-" + k).parentEle
 let formShownAt = performance.now(), doneKind = null, lastSummary = "";
 
 /* true only when the site's Worker confirms the email went out ({ ok: true }) */
+/* why the last send failed; shown under the failure panel on the workers.dev test addresses only, never on galfrank.com */
+const TEST_HOST = /\.workers\.dev$|^(127\.0\.0\.1|localhost)$/.test(location.hostname);
+let sendWhy = "";
 async function sendLead(payload) {
-  if (!CONFIG.formEndpoint) return false;
+  sendWhy = "";
+  if (!CONFIG.formEndpoint) { sendWhy = "no endpoint"; return false; }
   const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 12000);
   try {
     const r = await fetch(CONFIG.formEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload), signal: ctl.signal });
-    const j = r.ok ? await r.json().catch(() => null) : null;
-    return !!(j && j.ok === true);
-  } catch (err) { return false; } finally { clearTimeout(timer); }
+    const j = await r.json().catch(() => null);
+    if (r.ok && j && j.ok === true) return true;
+    sendWhy = "HTTP " + r.status + (j ? " · " + [j.error, j.code, j.detail, (j.missing || []).join(" + ")].filter(Boolean).join(" · ") : "");
+    return false;
+  } catch (err) { sendWhy = err && err.name === "AbortError" ? "timeout" : "network error"; return false; } finally { clearTimeout(timer); }
 }
 
 async function onSubmit(e) {
@@ -1298,6 +1306,8 @@ function renderDone() {
   $("#doneTitle").textContent = t(ok ? "done.ok.title" : "done.wa.title");
   $("#doneText").textContent = t(ok ? "done.ok.text" : "done.wa.text");
   $("#doneTag").textContent = ok ? "✓ SENT" : "✓ READY";
+  $("#doneWhy").hidden = ok || !TEST_HOST || !sendWhy;
+  $("#doneWhy").textContent = "test info: " + sendWhy;
   /* both outcomes offer WhatsApp with the same details: optional after the email went out, the way to send them when it didn't */
   $("#doneRow").innerHTML = '<a class="btn btn-primary" target="_blank" rel="noopener" href="' + esc(waLink(lastSummary)) + '">' + t(ok ? "done.ok.wa" : "done.wa.btn") + "</a>" +
     '<button class="btn btn-ghost" type="button" id="again">' + t("done.again") + "</button>";
