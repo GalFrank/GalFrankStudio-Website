@@ -1,6 +1,6 @@
 // Cloudflare Workers config: serves the repo root as a static site, plus worker/index.js for the
-// contact form (POST /api/contact). Static files are served first; the Worker only sees requests
-// that match no file. "name" must match the Worker name in the Cloudflare dashboard or the build fails.
+// contact form (POST /api/contact). Static files are served first; /api/* always goes to the Worker.
+// "name" must match the Worker name in the Cloudflare dashboard or the build fails.
 // Files listed in .assetsignore are never published.
 {
   "name": "galfrankstudio-website",
@@ -10,7 +10,11 @@
     "enabled": true
   },
   "assets": {
-    "directory": "."
+    "directory": ".",
+    // Unknown addresses get 404.html (with a 404 status) instead of a bare "Not found".
+    "not_found_handling": "404-page",
+    // /api/* always goes to the Worker (the contact form), whatever else matches.
+    "run_worker_first": ["/api/*"]
   },
   "vars": {
     "CONTACT_TO": "galfrankstudio@gmail.com",

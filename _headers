@@ -1,0 +1,12 @@
+# Response headers for the site's files (Cloudflare Workers static assets). This file is read by Cloudflare, not served.
+# The contact-form Worker (/api/contact) is not covered by these rules.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: SAMEORIGIN
+
+# The workers.dev copies (the production fallback address, PR previews, version URLs) stay out of search results;
+# only galfrank.com should be indexed.
+https://:name.:subdomain.workers.dev/*
+  X-Robots-Tag: noindex

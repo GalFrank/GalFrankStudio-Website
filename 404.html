@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>העמוד לא נמצא · Gal Frank Studio</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0D0E12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F1F1EC" media="(prefers-color-scheme: light)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@700&family=IBM+Plex+Sans+Hebrew:wght@400;600&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* Served by Cloudflare (assets.not_found_handling = "404-page") for any address that doesn't exist. Same tokens as index.html. */
+:root {
+  --bg: #0D0E12; --surface: #15171E; --line: #2A2D38; --fg: #EDECE7; --muted: #9A9CA7; --accent: #52C6FF; --accent-ink: #04141D;
+  --display: "Karantina", "Arial Narrow", sans-serif;
+  --body: "IBM Plex Sans Hebrew", "Segoe UI", "Arial Hebrew", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root { --bg: #F1F1EC; --surface: #FFFFFF; --line: #D8D8D0; --fg: #121319; --muted: #5C5F6B; --accent: #0479BA; --accent-ink: #FFFFFF; color-scheme: light; }
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 400 17px/1.6 var(--body); display: flex; flex-direction: column; }
+.bars { display: grid; grid-template-columns: repeat(7, 1fr); height: 5px; flex: none; }
+.bars i:nth-child(1) { background: #C0C0C0; } .bars i:nth-child(2) { background: #C0C000; } .bars i:nth-child(3) { background: #00C0C0; }
+.bars i:nth-child(4) { background: #00C000; } .bars i:nth-child(5) { background: #C000C0; } .bars i:nth-child(6) { background: #C00000; } .bars i:nth-child(7) { background: #0000C0; }
+main { flex: 1; display: grid; place-items: center; padding: 48px 16px; }
+.card { width: min(560px, 100%); border: 1px solid var(--line); background: var(--surface); padding: clamp(24px, 6vw, 44px); display: grid; gap: 14px; }
+.tc { justify-self: start; font-family: var(--mono); font-size: 12px; letter-spacing: .12em; color: var(--muted); direction: ltr; }
+.tc::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #FF5050; margin-inline-end: 8px; vertical-align: middle; }
+h1 { margin: 0; font-family: var(--display); font-weight: 700; font-size: clamp(5rem, 22vw, 9rem); line-height: .8; color: var(--accent); }
+p { margin: 0; color: var(--muted); }
+p strong { display: block; color: var(--fg); font-size: 1.25rem; }
+.row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font: 600 15px/1 var(--body); text-decoration: none; padding: 14px 20px; border-radius: 4px; border: 1px solid transparent; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-ghost { border-color: var(--line); color: var(--fg); }
+.btn:hover { filter: brightness(1.08); }
+.btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+</style>
+</head>
+<body>
+<div class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<main>
+  <div class="card">
+    <span class="tc" aria-hidden="true">NO SIGNAL · TC 00:00:04:04</span>
+    <h1>404</h1>
+    <p><strong>העמוד הזה לא נמצא.</strong>אולי הקישור ישן, או שהעמוד עבר מקום.</p>
+    <p lang="en" dir="ltr"><strong>This page doesn't exist.</strong>The link may be old, or the page has moved.</p>
+    <div class="row">
+      <a class="btn btn-primary" href="/">חזרה לדף הבית</a>
+      <a class="btn btn-ghost" href="/#en" lang="en" dir="ltr">Back to the home page</a>
+    </div>
+  </div>
+</main>
+</body>
+</html>
