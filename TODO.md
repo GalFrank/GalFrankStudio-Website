@@ -6,7 +6,7 @@ Last updated 2026-10-06. Keep this file current: tick items off and add new find
 
 - **Hosting: Cloudflare Workers (static assets).** Worker name `galfrankstudio-website`, connected to this GitHub repo.
   - Merging into `main` deploys production to https://galfrankstudio-website.galord01.workers.dev in about 15 seconds.
-  - Pull requests get their own preview URL, posted by the `cloudflare-workers-and-pages` bot as a PR comment. Preview builds run `npx wrangler preview`, which needs the `"previews": {}` block in `wrangler.jsonc`.
+  - Pull requests get their own preview URL, posted by the `cloudflare-workers-and-pages` bot as a PR comment. Preview builds run `npx wrangler preview`, which needs the `"previews"` block in `wrangler.jsonc`. **Previews do not inherit the top-level settings:** any `vars` or binding the site needs (the contact form's `CONTACT_*` vars and `send_email`) must be repeated inside `previews`.
   - `wrangler.jsonc` publishes the repo root. `.assetsignore` keeps repo files (`.git`, README, CLAUDE.md, this file, config) from being published. **Add any new non-site file to `.assetsignore`.**
 - **galfrank.com is live on Cloudflare (2026-10-06).**
   - Nameservers: `porter`/`tricia.ns.cloudflare.com`.
@@ -32,7 +32,7 @@ Last updated 2026-10-06. Keep this file current: tick items off and add new find
     - Still possible: end-screen elements an uploader adds in YouTube Studio (last 5–20 s of a video) draw over the picture. Remove end screens on these videos in YouTube Studio if they show up.
     - Clicking the video pauses it: the frame blurs and dims under a play icon, which also hides YouTube's pause screen.
     - If the browser refuses to start a video with sound (possible on iPhone), after 4 s the frame hands taps straight to YouTube's own play button.
-  - The contact form posts to `/api/contact` (`worker/index.js`), which emails the owner. Email sending was switched on 2026-10-06, after the owner verified the Gmail address in Email Routing (see 3A). If sending fails, the form falls back to WhatsApp.
+  - The contact form posts to `/api/contact` (`worker/index.js`), which emails the owner. Email sending was switched on 2026-10-06, after the owner verified the Gmail address in Email Routing (see 3A). After sending, the form says "נשלח!" / "Done!" and offers to send the same details on WhatsApp too; if sending fails, it says "כמעט שם" and WhatsApp is the way to send them.
   - New Hebrew hero subtitle.
 
 ## 1. Domain move (done 2026-10-06)
@@ -69,7 +69,7 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
   - Reply-To is the visitor's email; the email includes a wa.me link.
 - The page shows "Message received" only when the Worker answers `{ ok: true }`. Otherwise (not configured, error, 12 s timeout) it offers WhatsApp with all the details.
 - **Switched on (2026-10-06):** `GalFrankStudio@gmail.com` is a verified Email Routing destination, and the `send_email` binding in `wrangler.jsonc` is enabled with `destination_address` set to it, so the Worker can only ever email that one address.
-  - The PR preview has the same binding, so a test inquiry sent from the preview link really arrives.
+  - The PR preview has its own copy of the vars and binding (`previews` block), so a test inquiry sent from the preview link really arrives. (The first try failed because the preview had neither.)
   - If an inquiry doesn't arrive, look in Cloudflare → Workers → `galfrankstudio-website` → Logs for "contact form send failed" and its error code (e.g. `E_SENDER_DOMAIN_NOT_AVAILABLE` means galfrank.com isn't onboarded to Email Service / Email Routing).
 - If spam shows up: add Cloudflare Turnstile.
 - Tests: `node --test` (repo root) runs `tests/worker.test.mjs`.
