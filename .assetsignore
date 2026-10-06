@@ -12,3 +12,5 @@ wrangler.toml
 README.md
 CLAUDE.md
 TODO.md
+worker
+tests

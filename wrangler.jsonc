@@ -1,8 +1,10 @@
-// Cloudflare Workers config: serves the repo root as a static site.
-// "name" must match the Worker name in the Cloudflare dashboard or the build fails.
+// Cloudflare Workers config: serves the repo root as a static site, plus worker/index.js for the
+// contact form (POST /api/contact). Static files are served first; the Worker only sees requests
+// that match no file. "name" must match the Worker name in the Cloudflare dashboard or the build fails.
 // Files listed in .assetsignore are never published.
 {
   "name": "galfrankstudio-website",
+  "main": "worker/index.js",
   "compatibility_date": "2026-10-01",
   "observability": {
     "enabled": true
@@ -10,6 +12,14 @@
   "assets": {
     "directory": "."
   },
+  "vars": {
+    "CONTACT_TO": "GalFrankStudio@gmail.com",
+    "CONTACT_FROM": "website@galfrank.com"
+  },
+  // Contact form email. Enable only after GalFrankStudio@gmail.com is a *verified* destination in
+  // Cloudflare → Email Service → Email Routing (Cloudflare may refuse to deploy before that).
+  // Until then the form tells visitors to send their details on WhatsApp instead.
+  // "send_email": [{ "name": "EMAIL", "destination_address": "GalFrankStudio@gmail.com" }],
   // Required by the pull-request preview builds (`wrangler preview`); empty = same settings as production.
   "previews": {}
 }
