@@ -8,17 +8,26 @@ Last updated 2026-10-06. Keep this file current: tick items off and add new find
   - Merging into `main` deploys production to https://galfrankstudio-website.galord01.workers.dev in about 15 seconds.
   - Pull requests get their own preview URL, posted by the `cloudflare-workers-and-pages` bot as a PR comment. Preview builds run `npx wrangler preview`, which needs the `"previews": {}` block in `wrangler.jsonc`.
   - `wrangler.jsonc` publishes the repo root. `.assetsignore` keeps repo files (`.git`, README, CLAUDE.md, this file, config) from being published. **Add any new non-site file to `.assetsignore`.**
-- **galfrank.com still shows the old WordPress (Elementor) site** on a LiteSpeed host at 46.202.158.123. The owner is moving the domain to Cloudflare (see below).
+- **galfrank.com is live on Cloudflare (2026-10-06).**
+  - Nameservers: `porter`/`tricia.ns.cloudflare.com`.
+  - Custom Domain attached to the Worker (Production only, no subdomain).
+  - Let's Encrypt certificate.
+  - Some DNS caches still pointed at the old WordPress server (46.202.158.123) for a while; those responses have no `cf-ray` header. Keep the old hosting running for a day or two until that clears.
+  - `www.galfrank.com` doesn't exist yet (see section 1, step 4).
 - Netlify is not used. Ignore older notes that mention Netlify or Netlify Forms.
 - Done so far (PR #1, merged): headline invisible on phones (`fitHeadline()` measured a `display: contents` wrapper); repo files publicly downloadable on Cloudflare; Cloudflare PR preview builds failing.
 
-## 1. Domain move (owner doing it)
+## 1. Domain move (steps 1–3 done 2026-10-06; www still to do)
 
 1. Save anything worth keeping from the old WordPress site (texts, images). It stops being visible on galfrank.com after the switch.
 2. Cloudflare dashboard → add the domain `galfrank.com` (Free plan) → check the imported DNS records → at the registrar where the domain was bought, replace the nameservers with the two Cloudflare shows → wait until Cloudflare says the domain is **Active**.
 3. **Workers & Pages** → `galfrankstudio-website` → **Settings** → **Domains & Routes** → **Add** → **Custom Domain** → `galfrank.com`.
    - A Custom Domain can't be created on a hostname that already has a CNAME record. If Cloudflare complains, delete the old record for that name (the old A record pointed at 46.202.158.123).
-4. **www:** Custom Domains match one exact hostname, so `www.galfrank.com` needs a redirect rule (Cloudflare docs: "Redirect from www to root") plus a proxied DNS `A` record for `www` pointing to `192.0.2.0`.
+4. **www:** Custom Domains match one exact hostname, so `www.galfrank.com` needs two things:
+   - a proxied DNS `A` record: name `www`, IPv4 `192.0.2.0`, proxied (orange cloud);
+   - a redirect rule from the template "Redirect from WWW to root": request URL `https://www.*` → target `https://${1}`, status 301, preserve query string.
+
+   Also make sure **SSL/TLS → Edge Certificates → Always Use HTTPS** is on, so `http://` addresses get upgraded first.
 5. If the domain was bought from the same company that hosts the old WordPress site, **keep the domain renewal paid** before cancelling any hosting plan.
 6. Then ask Claude to check galfrank.com end to end. The site's canonical and og:url tags already say `https://galfrank.com/`.
 
