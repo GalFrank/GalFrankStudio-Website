@@ -15,7 +15,17 @@ Last updated 2026-10-06. Keep this file current: tick items off and add new find
   - Some DNS caches still pointed at the old WordPress server (46.202.158.123) for a while; those responses have no `cf-ray` header. Keep the old hosting running for a day or two until that clears.
   - `www.galfrank.com`: proxied A record plus a 301 redirect to the root, with Always Use HTTPS on (set up 2026-10-06). DNS is verified. The redirect itself is untested from the cloud sandbox, which blocks www and plain http.
 - Netlify is not used. Ignore older notes that mention Netlify or Netlify Forms.
-- Done so far (PR #1, merged): headline invisible on phones (`fitHeadline()` measured a `display: contents` wrapper); repo files publicly downloadable on Cloudflare; Cloudflare PR preview builds failing.
+- Done so far:
+  - PR #1: headline invisible on phones (`fitHeadline()` measured a `display: contents` wrapper); repo files publicly downloadable on Cloudflare; Cloudflare PR preview builds failing.
+  - Live showreel in the hero:
+    - The monitor "powers on" and zooms in on load, then the reel plays muted (YouTube IFrame API) with a pulsing "צפו עם סאונד" nudge.
+    - A click restarts it with sound.
+    - Pause / sound / full-screen controls; the timecode is the real video time; dragging the ruler or using the arrow keys seeks the video.
+    - It pauses off-screen.
+    - No autoplay for reduced motion or data saver; falls back to poster + play button if autoplay is refused.
+  - Project videos play inside the feature frame instead of a pop-up. The pop-up (lightbox) is gone. One video with sound at a time.
+  - The contact form posts to `/api/contact` (`worker/index.js`), which emails the owner. Email sending is switched off until the Gmail address is verified (see 3A); until then the form falls back to WhatsApp.
+  - New Hebrew hero subtitle.
 
 ## 1. Domain move (done 2026-10-06)
 
@@ -36,23 +46,23 @@ Last updated 2026-10-06. Keep this file current: tick items off and add new find
 The owner doesn't use an @galfrank.com mailbox but wants forwarding, e.g. `hello@galfrank.com` → `GalFrankStudio@gmail.com`. Cloudflare Email Routing is free:
 
 1. Dashboard → **Compute** → **Email Service** → **Email Routing**. Enable it for galfrank.com and let it add its DNS records (MX, SPF, DKIM).
-2. **Destination Addresses**: add `GalFrankStudio@gmail.com` and click the verification link Cloudflare emails.
+2. **Destination Addresses**: add `GalFrankStudio@gmail.com` and click the verification link Cloudflare emails. The same verified address lets the contact form email the owner (see 3A).
 3. Create a routing rule: custom address (for example `hello`) → that Gmail address. A catch-all rule is optional.
 4. Test it by sending from a *different* account (some providers drop mail sent to yourself).
 5. Optional: show `hello@galfrank.com` on the site instead of the Gmail address (`CONFIG.email` in index.html). Replying *from* @galfrank.com needs extra setup (Gmail "Send mail as"); forwarding only receives.
 
 ## 3. Site improvements (from the 2026-10-06 audit)
 
-Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, accessibility 96, best practices 96, SEO 100, desktop CLS 0.147.
+Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, accessibility 96, best practices 96, SEO 100, desktop CLS 0.147. After the video and form work: 70 / 94, accessibility 97, CLS 0.012 mobile / 0.036 desktop.
 
-### A. Contact form should reach the owner by email
-- Today `CONFIG.formEndpoint` is empty, so the form only builds a WhatsApp message. A visitor who doesn't tap "Send on WhatsApp" is a lost lead.
-- On Cloudflare there are two options:
-  - (a) A small Worker endpoint (e.g. `/api/contact`) that sends the email with Cloudflare Email Service to the verified destination. This needs a `main` script and `assets.run_worker_first` for `/api/*` in `wrangler.jsonc`, plus spam protection (Turnstile or a honeypot).
-  - (b) A third-party endpoint (Formspree/Web3Forms). The existing JSON POST code already supports it.
-- Keep the WhatsApp fallback.
-- Only show "Message received" on a verified success.
-- Run the "Exporting…" button animation at the same time as the request, not after it, and add a ~10s timeout.
+### A. Contact form → email (built; one step left)
+- `worker/index.js` handles `POST /api/contact`. It validates the fields, has spam traps (a hidden honeypot field and a "submitted in under 2 s" check), and emails the owner through the `send_email` binding.
+  - Sending to a verified Email Routing destination is free on Workers Free.
+  - Reply-To is the visitor's email; the email includes a wa.me link.
+- The page shows "Message received" only when the Worker answers `{ ok: true }`. Otherwise (not configured, error, 12 s timeout) it offers WhatsApp with all the details.
+- **Remaining step:** once `GalFrankStudio@gmail.com` is verified in Email Routing (section 2), uncomment the `send_email` line in `wrangler.jsonc`, merge, then send a real test inquiry. Cloudflare may refuse to deploy the binding before the address is verified.
+- If spam shows up: add Cloudflare Turnstile.
+- Tests: `node --test` (repo root) runs `tests/worker.test.mjs`.
 
 ### B. Speed and layout jump
 - **Move the images out of index.html.** The base64 portrait is ~72 KB (`<img src="data:image/webp…` in `#portrait`). The `const LOGOS = {…}` block is ~135 KB: 9 single-colour PNG masks plus an Isuzu SVG.
@@ -67,15 +77,13 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
   - Put the same `.w` spans in the static HTML.
   - Cap the h1 size around 6.1rem so `fitHeadline()` rarely has to resize.
   - Reserve height for the client-logo bar.
-- **Animation loops.** The hero timecode `requestAnimationFrame` loop runs forever and re-filters a blurred layer every frame. Pause it when the hero is off-screen (IntersectionObserver). Let the custom-cursor loop idle when the pointer is still.
-- **Thumbnails.**
-  - The featured project and the hero use YouTube `hqdefault` (480 px) stretched to ~690 px, so they look soft. Use `maxresdefault` and fall back to hqdefault when `naturalWidth <= 120` (YouTube's "missing" placeholder).
-  - The small list thumbnails can use `mqdefault` (320×180, no black bars).
+- **Animation loops.** Done for the hero (it only animates while the reel plays and is on screen). Still to do: let the custom-cursor loop idle when the pointer is still.
+- **Thumbnails.** Done: the feature and hero posters try `maxresdefault` and fall back to `hqdefault` (`fixThumb()`); list thumbnails use `mqdefault`.
+- **YouTube and CLS.** YouTube's player shifts its own layout while loading, and that counts toward the page's CLS in proportion to the frame's on-screen size. That's why `.viewer .reel` is `scale(.02)` until the reel is revealed; keep that if you touch the reel CSS. The player also starts only after `load` + fonts + 900 ms, so it never competes with the first paint.
 
 ### C. Visible bugs
 - The contact tile breaks the email mid-word ("GalFrankStudio@gm / ail.com"). Add `<wbr>` after the `@`.
-- Video popup on phones: the 20 px padding on `.lb-stage` shrinks the video. Make the iframe fill the stage (`position:absolute; inset:0`).
-- Switching language doesn't update the form's "sent" panel (stays Hebrew) or the mobile-menu footer.
+- Switching language doesn't update the mobile-menu footer. (The form's "sent" panel is fixed.)
 - The footer year is hard-coded ("© 2026"). Make it dynamic.
 - CSS typo `img { max-width: 100%%; }` and a stray `:root { margin: 0; }` at the top of the `<style>`.
 
@@ -84,20 +92,15 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
 - **Accessible names don't contain the visible text.**
   - `.brand`: `aria-label="Gal Frank Studio"` vs visible "GalFrankStudio".
   - `#langBtn` (shows "EN").
-  - `#viewer`: an English "Play showreel" label on the Hebrew page, vs visible "שואוריל 2026".
   - The contact tiles' `aria-label`.
-- **Keyboard focus** escapes the open mobile menu and the video popup. Make the background `inert` while they're open.
-- **Form.**
-  - Errors aren't announced (add `aria-describedby` and `aria-invalid`).
-  - Focus is lost after submitting (move it to `#doneTitle`).
-  - `#f-name` is missing `type="text"`.
+- **Keyboard focus** escapes the open mobile menu. Make the background `inert` while it's open.
 - The `#svc` swipe row on mobile is scrollable but not keyboard-focusable. Add `tabindex="0"` when it's scrollable.
 - **Landmarks.**
   - The WhatsApp button sits outside any landmark.
   - The footer `<nav>` and `.mnav` need unique labels.
   - The header links aren't in a `<nav>`.
-- **Invalid HTML.** `<div>` inside `<button>` (`#viewer`, feature card), and `aria-label` on `<ol id="list">`.
-- **Untranslated labels.** The chips group ("Filter"), the list ("Projects"), the viewer.
+- **Invalid HTML.** `aria-label` on `<ol id="list">`, and the footer `<nav>` needs a label.
+- **Untranslated labels.** The chips group ("Filter") and the list ("Projects").
 
 ### E. Sharing and search
 - The `og:image` is a 480×360 YouTube thumbnail.
@@ -120,7 +123,11 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
 - Branded 404 page plus `"not_found_handling": "404-page"` under `assets` in `wrangler.jsonc`.
 - www → root redirect (see section 1).
 
-### G. Ask the owner first
+### G. Optional upgrade: self-hosted showreel file
+- With the original showreel MP4, the hero could use a native `<video>` (H.264, ~720p, under Cloudflare's 25 MiB per-file limit; ffmpeg is available in the cloud sandbox). That gives frame-smooth scrubbing, no YouTube player code (~1 MB) and no YouTube branding.
+- The reel code talks to the player only through `reel.player` (play, pause, seek, mute, current time), so swapping in a native video means a small adapter.
+
+### H. Ask the owner first
 - Visitor stats: Cloudflare Web Analytics is free and easy now that the site is on Cloudflare.
 - Copy voice mixes "I" (About) and "we" (services, contact). Keep it, or unify?
 
@@ -131,6 +138,8 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
   - Widths 320, 390, 760, 820 and 1440, in Hebrew and English (`localStorage gf-lang` or `#en`), light and dark.
   - Pass criteria: no console errors and no horizontal overflow.
   - Also exercise the menu, popup, filters, form and language switch.
+- Video: the cloud sandbox can't stream YouTube video (googlevideo.com is blocked). Test the reel and project players against a stand-in `window.YT` (serve a mock at `https://www.youtube.com/iframe_api` via Playwright routing) that simulates states, time and seeking. Also run one smoke test against the real API, which loads and reports the duration.
+- Contact Worker: `node --test` from the repo root.
 - Lighthouse and axe-core can be installed with npm in a scratch folder.
 - Cloud-session network allowlist used so far:
   - `developers.cloudflare.com`, `api.cloudflare.com`, `dash.cloudflare.com`
