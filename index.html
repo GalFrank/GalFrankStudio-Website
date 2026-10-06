@@ -6,8 +6,11 @@
 <title>Gal Frank Studio</title>
 <meta name="description" content="גל פרנק סטודיו – עריכת וידאו, מושן גרפיקס ותוכן AI למותגים. פרסומות, סרטי תדמית ורילס ל-El Al, Intel, לאומית, בזק ועוד.">
 <link rel="canonical" href="https://galfrank.com/">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230D0E12'/%3E%3Ctext x='32' y='44' font-family='Arial Narrow,Arial,sans-serif' font-weight='700' font-size='34' text-anchor='middle' fill='%2352C6FF'%3EGF%3C/text%3E%3C/svg%3E">
-<meta name="theme-color" content="#0D0E12">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="theme-color" content="#0D0E12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#F1F1EC" media="(prefers-color-scheme: light)">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://galfrank.com/">
 <meta property="og:site_name" content="GalFrankStudio">
@@ -15,7 +18,48 @@
 <meta property="og:title" content="GalFrankStudio – עזבו את החפירות. תראו את העבודות.">
 <meta property="og:description" content="עריכת וידאו, מושן גרפיקס ותוכן AI למותגים. צפו בשואוריל ובעבודות עבור El Al, Intel, לאומית, בזק ועוד.">
 <meta property="og:image" content="https://i.ytimg.com/vi/o4o1LXvFJ8A/hqdefault.jpg">
+<meta property="og:image:width" content="480">
+<meta property="og:image:height" content="360">
+<meta property="og:image:alt" content="גל פרנק סטודיו – שואוריל 2026">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="GalFrankStudio – עזבו את החפירות. תראו את העבודות.">
+<meta name="twitter:description" content="עריכת וידאו, מושן גרפיקס ותוכן AI למותגים. צפו בשואוריל ובעבודות עבור El Al, Intel, לאומית, בזק ועוד.">
+<meta name="twitter:image" content="https://i.ytimg.com/vi/o4o1LXvFJ8A/hqdefault.jpg">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "ProfessionalService",
+ "@id": "https://galfrank.com/#studio",
+ "name": "Gal Frank Studio",
+ "alternateName": [
+  "GalFrankStudio",
+  "גל פרנק סטודיו"
+ ],
+ "url": "https://galfrank.com/",
+ "description": "גל פרנק סטודיו – עריכת וידאו, מושן גרפיקס ותוכן AI למותגים. פרסומות, סרטי תדמית ורילס ל-El Al, Intel, לאומית, בזק ועוד.",
+ "logo": "https://galfrank.com/img/icon-512.png",
+ "image": "https://galfrank.com/img/gal-1000.webp",
+ "telephone": "+972-54-925-4435",
+ "email": "GalFrankStudio@gmail.com",
+ "areaServed": {
+  "@type": "Country",
+  "name": "Israel"
+ },
+ "knowsLanguage": [
+  "he",
+  "en"
+ ],
+ "founder": {
+  "@type": "Person",
+  "name": "Gal Frank",
+  "alternateName": "גל פרנק",
+  "jobTitle": "Video editor"
+ },
+ "sameAs": [
+  "https://instagram.com/galfrankstudio"
+ ]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://www.youtube.com">
@@ -23,9 +67,8 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karantina:wght@400;700&family=IBM+Plex+Sans+Hebrew:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
 /* Layout: an edit suite. Hero = viewer monitor with live 25fps timecode; process = a timeline track; color bars as the one loud detail. */
-:root { margin: 0; }
 body { margin: 0; }
-img { max-width: 100%%; }
+img { max-width: 100%; }
 :root {
   --bg: #0D0E12;
   --surface: #15171E;
@@ -84,7 +127,8 @@ header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; 
 .brand:hover { color: var(--accent); }
 .brand:hover b { color: var(--fg); }
 @media (max-width: 520px) { .brand { font-size: 28px; } .nav > .btn-primary { display: none; } }
-.nav ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; margin-inline-start: auto; }
+.nav .nav-links { margin-inline-start: auto; }
+.nav ul { display: flex; gap: 22px; list-style: none; margin: 0; padding: 0; }
 .nav ul a { text-decoration: none; font-size: 15px; color: var(--muted); transition: color .15s; }
 .nav ul a:hover { color: var(--fg); }
 .lang { font-family: var(--mono); font-size: 13px; background: none; border: 1px solid var(--line); color: var(--fg); padding: 6px 10px; border-radius: 4px; cursor: pointer; }
@@ -95,7 +139,7 @@ header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; 
 .btn-ghost { border-color: var(--line); color: var(--fg); background: transparent; }
 .btn-ghost:hover { border-color: var(--fg); }
 .btn-sm { padding: 10px 14px; font-size: 14px; }
-@media (max-width: 820px) { .nav ul { display: none; } .nav .lang { margin-inline-start: auto; } }
+@media (max-width: 820px) { .nav .nav-links { display: none; } .nav .lang { margin-inline-start: auto; } }
 
 /* hero */
 .hero { padding-block: clamp(40px, 7vw, 88px) clamp(48px, 7vw, 80px); }
@@ -174,6 +218,7 @@ header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; 
 
 /* services */
 .svc { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-block-start: 1px solid var(--line); }
+.svc:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 @media (max-width: 760px) { .svc { grid-template-columns: 1fr; } }
 .svc article { padding: 34px 0; border-block-end: 1px solid var(--line); display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 20px; }
 .svc article:nth-child(odd) { padding-inline-end: clamp(0px, 4vw, 48px); }
@@ -631,16 +676,16 @@ body.menu-open .wa-fab, body.menu-open .cur { display: none; }
 
 <header class="top">
   <div class="wrap nav">
-    <a class="brand" href="#top" aria-label="Gal Frank Studio">GalFrank<b>Studio</b></a>
-    <ul>
+    <a class="brand" href="#top">GalFrank<b>Studio</b></a>
+    <nav class="nav-links" aria-label="ראשי" data-i18n-aria="nav.main"><ul>
       <li><a href="#work" data-i18n="nav.work">עבודות</a></li>
       <li><a href="#about" data-i18n="nav.about">אודות</a></li>
       <li><a href="#services" data-i18n="nav.services">שירותים</a></li>
       <li><a href="#process" data-i18n="nav.process">תהליך</a></li>
       <li><a href="#contact" data-i18n="nav.contact">צור קשר</a></li>
-    </ul>
+    </ul></nav>
     <span class="stc" id="stc" aria-hidden="true">TC 00:00:00:00</span>
-    <button class="lang" id="langBtn" type="button" aria-label="Switch language">EN</button>
+    <button class="lang" id="langBtn" type="button" lang="en" aria-label="EN, switch to English">EN</button>
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="mnav" aria-label="Menu"><i></i><i></i></button>
     <a class="btn btn-primary btn-sm" href="#contact" data-i18n="cta.talk">בואו נדבר</a>
   </div>
@@ -648,7 +693,7 @@ body.menu-open .wa-fab, body.menu-open .cur { display: none; }
   <div class="prog" aria-hidden="true"><i id="progBar"></i></div>
 </header>
 <div class="cur" id="cur" aria-hidden="true"></div>
-<nav class="mnav" id="mnav" hidden aria-label="Menu">
+<nav class="mnav" id="mnav" hidden aria-label="תפריט" data-i18n-aria="nav.menu">
   <ol>
     <li><a href="#work" data-i18n="nav.work">עבודות</a><span class="mono">01</span></li>
     <li><a href="#about" data-i18n="nav.about">אודות</a><span class="mono">02</span></li>
@@ -712,9 +757,9 @@ body.menu-open .wa-fab, body.menu-open .cur { display: none; }
     <div class="wrap">
       <div class="sec-head">
         <div><span class="eyebrow">TC 00:01:00:00</span><h2 data-i18n="work.title">עבודות נבחרות</h2></div>
-        <div class="chips" role="group" aria-label="Filter" id="chips"></div>
+        <div class="chips" role="group" aria-label="סינון עבודות לפי קטגוריה" data-i18n-aria="work.filter" id="chips"></div>
       </div>
-      <div class="bin"><div id="featWrap"></div><span class="swipe" aria-hidden="true" data-i18n="swipe">החליקו לעוד ←</span><ol class="list" id="list" aria-label="Projects"></ol></div>
+      <div class="bin"><div id="featWrap"></div><span class="swipe" aria-hidden="true" data-i18n="swipe">החליקו לעוד ←</span><ol class="list" id="list"></ol></div>
     </div>
   </section>
 
@@ -777,7 +822,7 @@ body.menu-open .wa-fab, body.menu-open .cur { display: none; }
         </form>
         <div class="done" id="done" hidden>
           <span class="ok mono" id="doneTag">✓ READY</span>
-          <h3 id="doneTitle" tabindex="-1"></h3>
+          <h3 id="doneTitle" tabindex="-1">נשלח!</h3>
           <p id="doneText"></p>
           <p class="why mono" id="doneWhy" hidden></p>
           <div class="row" id="doneRow"></div>
@@ -790,20 +835,21 @@ body.menu-open .wa-fab, body.menu-open .cur { display: none; }
 <footer>
   <div class="wrap row">
     <span data-i18n="footer.copy">© 2026 גל פרנק סטודיו</span>
-    <nav><a href="#work" data-i18n="nav.work">עבודות</a><a href="#services" data-i18n="nav.services">שירותים</a><a href="#contact" data-i18n="nav.contact">צור קשר</a></nav>
+    <nav aria-label="קישורים בתחתית העמוד" data-i18n-aria="nav.footer"><a href="#work" data-i18n="nav.work">עבודות</a><a href="#services" data-i18n="nav.services">שירותים</a><a href="#contact" data-i18n="nav.contact">צור קשר</a></nav>
   </div>
+  <a class="wa-fab" id="waFab" href="#" target="_blank" rel="noopener">
+    <span id="fabIco"></span>
+    <span class="fab-txt">WhatsApp</span>
+  </a>
 </footer>
 
-<a class="wa-fab" id="waFab" href="#" target="_blank" rel="noopener">
-  <span id="fabIco"></span>
-  <span class="fab-txt">WhatsApp</span>
-</a>
 
 <script>
 /* ============================================================
    SITE SETTINGS — edit these values, nothing else needs to change
    ============================================================ */
 const CONFIG = {
+  // The phone, email and Instagram also appear in the search-engine info (<script type="application/ld+json"> in <head>): change both.
   whatsapp: "972549254435",          // international format, digits only (050-000-0000 → 972500000000)
   phoneDisplay: "054-925-4435",
   email: "GalFrankStudio@gmail.com",
@@ -841,7 +887,7 @@ function fixThumb(img, failed) {
 const T = {
   he: {
     "skip": "דילוג לתוכן", "nav.work": "עבודות", "nav.about": "אודות", "nav.services": "שירותים", "nav.process": "תהליך", "nav.contact": "צור קשר",
-    "cta.talk": "בואו נדבר", "hero.eyebrow": "עריכת וידאו · מושן גרפיקס · AI",
+    "cta.talk": "בואו נדבר", "nav.main": "ראשי", "nav.menu": "תפריט", "nav.footer": "קישורים בתחתית העמוד", "work.filter": "סינון עבודות לפי קטגוריה", "svc.list": "שירותים, החליקו לעוד", "hero.eyebrow": "עריכת וידאו · מושן גרפיקס · AI",
     "hero.title": "עזבו את החפירות.<br><em>תראו את העבודות.</em>",
     "hero.sub": "גל פרנק – סטודיו עריכת פרסומות מקצועי, רילס ותוכן למותגים, מהחומר הגולמי ועד קובץ מוכן לכל פלטפורמה.",
     "hero.reel": "צפו בשואוריל", "hero.quote": "קבלו הצעת מחיר", "reel.label": "שואוריל 2026",
@@ -862,7 +908,7 @@ const T = {
     "done.wa.title": "כמעט שם", "done.wa.text": "הפרטים מוכנים. לחצו כדי לשלוח אותם בוואטסאפ ונחזור אליכם.", "done.wa.btn": "שליחה בוואטסאפ",
     "done.ok.title": "נשלח!", "done.ok.text": "תודה! הפנייה התקבלה ונחזור אליכם בהקדם. רוצים תשובה מהירה יותר? אפשר לשלוח את הפרטים גם בוואטסאפ.", "done.ok.wa": "שליחה גם בוואטסאפ", "done.again": "שליחת פנייה נוספת",
     "d.wa": "וואטסאפ", "d.email": "אימייל", "d.ig": "אינסטגרם", "copy": "העתקה", "copied": "הועתק",
-    "footer.copy": "© 2026 גל פרנק סטודיו",
+    "footer.copy": "© {y} גל פרנק סטודיו",
     "reel.sound": "צפו עם סאונד", "reel.watch": "צפייה בשואוריל 2026 עם סאונד", "reel.pause": "השהיה", "reel.resume": "המשך ניגון", "reel.unmute": "הפעלת סאונד", "reel.mute": "השתקה", "reel.fs": "מסך מלא", "reel.ruler": "ציר הזמן של השואוריל",
     "proj.play": "נגן", "proj.stop": "עצירה", "proj.aria": "ניגון הסרטון: ", "proj.seek": "ציר הזמן של הסרטון",
     "wa.hello": "היי גל, הגעתי מהאתר.",
@@ -885,7 +931,7 @@ const T = {
   },
   en: {
     "skip": "Skip to content", "nav.work": "Work", "nav.about": "About", "nav.services": "Services", "nav.process": "Process", "nav.contact": "Contact",
-    "cta.talk": "Let's talk", "hero.eyebrow": "Video editing · Motion graphics · AI",
+    "cta.talk": "Let's talk", "nav.main": "Main", "nav.menu": "Menu", "nav.footer": "Footer links", "work.filter": "Filter work by category", "svc.list": "Services, swipe for more", "hero.eyebrow": "Video editing · Motion graphics · AI",
     "hero.title": "Skip the pitch.<br><em>Watch the work.</em>",
     "hero.sub": "Gal Frank Studio edits commercials, reels and brand content, from raw footage to a file that's ready for every platform.",
     "hero.reel": "Watch the showreel", "hero.quote": "Get a quote", "reel.label": "Showreel 2026",
@@ -906,7 +952,7 @@ const T = {
     "done.wa.title": "Almost there", "done.wa.text": "Your details are ready. Tap below to send them on WhatsApp and we'll reply.", "done.wa.btn": "Send on WhatsApp",
     "done.ok.title": "Done!", "done.ok.text": "Thanks! Your inquiry is in and we'll get back to you soon. Want a faster reply? Send the same details on WhatsApp too.", "done.ok.wa": "Also send on WhatsApp", "done.again": "Send another inquiry",
     "d.wa": "WhatsApp", "d.email": "Email", "d.ig": "Instagram", "copy": "Copy", "copied": "Copied",
-    "footer.copy": "© 2026 Gal Frank Studio",
+    "footer.copy": "© {y} Gal Frank Studio",
     "reel.sound": "Watch with sound", "reel.watch": "Watch Showreel 2026 with sound", "reel.pause": "Pause", "reel.resume": "Play", "reel.unmute": "Sound on", "reel.mute": "Mute", "reel.fs": "Full screen", "reel.ruler": "Showreel timeline",
     "proj.play": "Play", "proj.stop": "Stop", "proj.aria": "Play video: ", "proj.seek": "Video timeline",
     "wa.hello": "Hi Gal, I found you through your website.",
@@ -953,12 +999,14 @@ const t = (k) => T[lang][k] ?? k;
 const waLink = (text) => "https://wa.me/" + CONFIG.whatsapp + "?text=" + encodeURIComponent(text);
 
 function renderStatic() {
-  document.querySelectorAll("[data-i18n]").forEach((el) => (el.textContent = t(el.dataset.i18n)));
+  document.querySelectorAll("[data-i18n]").forEach((el) => (el.textContent = t(el.dataset.i18n).replace("{y}", new Date().getFullYear())));
   document.querySelectorAll("[data-i18n-aria]").forEach((el) => el.setAttribute("aria-label", t(el.dataset.i18nAria)));
   document.querySelectorAll("[data-i18n-html]").forEach((el) => (el.innerHTML = t(el.dataset.i18nHtml).split("<br>").map((l, i) => '<span class="w" style="animation-delay:' + i * 110 + 'ms">' + l + "</span>").join("<br>")));
   document.querySelectorAll("[data-i18n-ph]").forEach((el) => (el.placeholder = t(el.dataset.i18nPh)));
+  /* the spoken name starts with the visible text (EN / עב), in the language it is written in */
   $("#langBtn").textContent = lang === "he" ? "EN" : "עב";
-  $("#langBtn").setAttribute("aria-label", lang === "he" ? "Switch to English" : "מעבר לעברית");
+  $("#langBtn").lang = lang === "he" ? "en" : "he";
+  $("#langBtn").setAttribute("aria-label", lang === "he" ? "EN, switch to English" : "עב, מעבר לעברית");
 
   const logo = (c, hidden) => {
     const L = LOGOS[c.key]; if (!L) return "";
@@ -987,12 +1035,22 @@ function renderStatic() {
     ["mail", t("d.email"), CONFIG.email, "mailto:" + CONFIG.email]
   ];
   $("#direct").innerHTML = items.map(([id, k, v, href]) =>
-    '<a class="tile tile-' + id + '" href="' + esc(href) + '" target="_blank" rel="noopener" aria-label="' + esc(k + " " + v) + '">' +
-      '<span class="ic">' + ico(id) + '</span><span class="k">' + k + '</span><span class="v">' + esc(v) + "</span></a>").join("");
+    '<a class="tile tile-' + id + '" href="' + esc(href) + '" target="_blank" rel="noopener">' +
+      '<span class="ic">' + ico(id) + '</span><span class="k">' + k + '</span> <span class="v">' + esc(v).replace("@", "@<wbr>") + "</span></a>").join("");
   $("#waFab").href = waLink(t("wa.hello")); $("#fabIco").innerHTML = ico("wa");
   updateReelUI();
   renderDone();
+  if (!$("#mnav").hidden) renderMenuFoot();
+  svcFocus();
 }
+
+/* on phones the services row scrolls sideways: make it a named, focusable region so keyboard users can scroll it */
+function svcFocus() {
+  const el = $("#svc"), scrolls = el.scrollWidth > el.clientWidth + 1;
+  if (scrolls) { el.tabIndex = 0; el.setAttribute("role", "region"); el.setAttribute("aria-label", t("svc.list")); }
+  else { el.removeAttribute("tabindex"); el.removeAttribute("role"); el.removeAttribute("aria-label"); }
+}
+addEventListener("resize", () => svcFocus());
 
 let sel = null;
 const NARROW = () => matchMedia("(max-width: 900px)").matches;
@@ -1691,15 +1749,22 @@ document.addEventListener("click", (e) => {
     else playProject(i);
   }
 });
-document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#mnav").hidden) setMenu(false); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#mnav").hidden) setMenu(false, true); });
 $("#langBtn").addEventListener("click", () => setLang(lang === "he" ? "en" : "he"));
-function setMenu(open) {
-  $("#mnav").hidden = !open; $("#menuBtn").setAttribute("aria-expanded", open); document.body.classList.toggle("menu-open", open);
-  if (open) $("#mnavFoot").innerHTML =
+function renderMenuFoot() {
+  $("#mnavFoot").innerHTML =
     '<a href="' + esc(waLink(t("wa.hello"))) + '" target="_blank" rel="noopener"><span class="mi mi-wa">' + ico("wa") + t("d.wa") + '</span><span>' + esc(CONFIG.phoneDisplay) + "</span></a>" +
     '<a href="https://instagram.com/' + esc(CONFIG.instagram) + '" target="_blank" rel="noopener"><span class="mi mi-ig">' + ico("ig") + t("d.ig") + '</span><span>@' + esc(CONFIG.instagram) + "</span></a>";
 }
-$("#menuBtn").addEventListener("click", () => setMenu($("#mnav").hidden));
+/* while the menu is open the page behind it is inert, so keyboard focus stays in the menu and the header */
+function setMenu(open, returnFocus) {
+  const was = !$("#mnav").hidden;
+  $("#mnav").hidden = !open; $("#menuBtn").setAttribute("aria-expanded", open); document.body.classList.toggle("menu-open", open);
+  document.querySelectorAll("#main, footer, .skip").forEach((el) => (el.inert = open));
+  if (open) { renderMenuFoot(); if (!was) $("#mnav a").focus({ preventScroll: true }); }
+  else if (was && returnFocus) $("#menuBtn").focus();
+}
+$("#menuBtn").addEventListener("click", () => setMenu($("#mnav").hidden, true));
 $("#mnav").addEventListener("click", (e) => { if (e.target.closest("ol a")) setMenu(false); });
 addEventListener("resize", () => { if (innerWidth > 820 && !$("#mnav").hidden) setMenu(false); });
 $("#form").addEventListener("submit", onSubmit);

@@ -94,46 +94,37 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
 - **Thumbnails.** Done: the feature and hero posters try `maxresdefault` and fall back to `hqdefault` (`fixThumb()`); list thumbnails use `mqdefault`.
 - **YouTube and CLS.** YouTube's player shifts its own layout while loading, and that counts toward the page's CLS in proportion to the frame's on-screen size. That's why `.viewer .reel` is `scale(.02)` until the reel is revealed; keep that if you touch the reel CSS. The player also starts only after `load` + fonts + 900 ms, so it never competes with the first paint.
 
-### C. Visible bugs
-- The contact tile breaks the email mid-word ("GalFrankStudio@gm / ail.com"). Add `<wbr>` after the `@`.
-- Switching language doesn't update the mobile-menu footer. (The form's "sent" panel is fixed.)
-- The footer year is hard-coded ("© 2026"). Make it dynamic.
-- CSS typo `img { max-width: 100%%; }` and a stray `:root { margin: 0; }` at the top of the `<style>`.
+### C. Visible bugs: done (2026-10-06)
+- The email tile now breaks after the `@` (`<wbr>`), not mid-word.
+- The mobile-menu footer is redrawn on a language switch.
+- The footer year comes from the clock (`{y}` in `footer.copy`).
+- Fixed `img { max-width: 100%%; }` (now `100%`) and removed the stray `:root { margin: 0; }`.
 
 ### D. Accessibility (axe + Lighthouse)
-- **Light-mode contrast.** The accent `#0479BA` on `#F1F1EC` is 4.1:1, under the 4.5:1 needed for small text (current-project title, swipe hints, role text). About `#0369A1` passes: 5.2:1 on the background, 5.9:1 with white text.
-- **Accessible names don't contain the visible text.**
-  - `.brand`: `aria-label="Gal Frank Studio"` vs visible "GalFrankStudio".
-  - `#langBtn` (shows "EN").
-  - The contact tiles' `aria-label`.
-- **Keyboard focus** escapes the open mobile menu. Make the background `inert` while it's open.
-- The `#svc` swipe row on mobile is scrollable but not keyboard-focusable. Add `tabindex="0"` when it's scrollable.
-- **Landmarks.**
-  - The WhatsApp button sits outside any landmark.
-  - The footer `<nav>` and `.mnav` need unique labels.
-  - The header links aren't in a `<nav>`.
-- **Invalid HTML.** `aria-label` on `<ol id="list">`, and the footer `<nav>` needs a label.
-- **Untranslated labels.** The chips group ("Filter") and the list ("Projects").
+- **Light-mode contrast: still open, needs the owner's OK** (it changes the light-mode blue). The accent `#0479BA` on `#F1F1EC` is 4.1:1, under the 4.5:1 needed for small text (current-project title, swipe hints). About `#0369A1` passes: 5.2:1 on the background, 5.9:1 with white text. This is the only axe finding left; dark mode is clean.
+- Done (2026-10-06):
+  - Accessible names now contain the visible text: `.brand` has no `aria-label`; `#langBtn` reads "EN, switch to English" / "עב, מעבר לעברית" with a matching `lang`; contact tiles take their name from their text.
+  - While the mobile menu is open, `#main`, `footer` and the skip link are `inert`, focus moves into the menu, and Escape / the menu button return focus to the button.
+  - On phones `#svc` (sideways scroller) becomes a named, focusable region (`svcFocus()`); on desktop it is not a tab stop.
+  - Landmarks: header links are in `<nav class="nav-links">`; header, menu and footer navs have unique translated labels; the WhatsApp button sits inside `<footer>` (it is `position: fixed`, so nothing moves).
+  - HTML: no `aria-label` on `<ol id="list">`; `#doneTitle` has default text. html-validate: 0 errors (was 3).
+  - Translated labels for the filter chips, menu and navs (`nav.*`, `work.filter`, `svc.list`).
 
 ### E. Sharing and search
-- The `og:image` is a 480×360 YouTube thumbnail.
-  - Make a branded 1200×630 image (dark background, colour bars, Karantina headline, portrait cutout).
-  - Add og:image width/height/alt and twitter tags.
-- **Search details.**
-  - A more descriptive `<title>`.
-  - JSON-LD (ProfessionalService / Person, sameAs Instagram).
-  - `robots.txt` and `sitemap.xml`.
-  - Real favicon files plus `apple-touch-icon.png`. The current favicon is a data URI, which Google may not crawl.
-  - `theme-color` for both light and dark.
-- After the domain move: optionally verify in Google Search Console.
+- **Needs the owner:** a branded 1200×630 `og:image` (dark background, colour bars, Karantina headline, portrait cutout) to replace the 480×360 YouTube thumbnail, and a more descriptive `<title>` (wording).
+- Done (2026-10-06):
+  - og:image width/height/alt and `twitter:title/description/image`.
+  - JSON-LD (`ProfessionalService` with founder, phone, email, Instagram) in `<head>`. It repeats facts from `CONFIG`: change both.
+  - `robots.txt` and `sitemap.xml` (update `lastmod` on big content changes).
+  - Real icon files: `favicon.ico` (16/32/48), `favicon.svg`, `apple-touch-icon.png` (180), `img/icon-512.png` (JSON-LD logo).
+  - `theme-color` for light and dark.
+- After the domain move: optionally verify in Google Search Console and submit the sitemap.
 
 ### F. Cloudflare and repo
-- A `_headers` file (supported by Workers static assets):
-  - `X-Content-Type-Options: nosniff`
-  - `Referrer-Policy: strict-origin-when-cross-origin`
-  - `X-Frame-Options: SAMEORIGIN`
-  - long cache for `/assets/fonts/*` once fonts are self-hosted
-- Branded 404 page plus `"not_found_handling": "404-page"` under `assets` in `wrangler.jsonc`.
+- Done (2026-10-06):
+  - `_headers` (read by Cloudflare, not served): `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, `X-Frame-Options: SAMEORIGIN` on every file, and `X-Robots-Tag: noindex` on the `*.workers.dev` copies (production fallback, previews) so only galfrank.com is indexed. It doesn't cover the Worker's own replies.
+  - `404.html` in the site's style, served with a 404 status for unknown addresses (`assets.not_found_handling: "404-page"`). `assets.run_worker_first: ["/api/*"]` keeps the contact form going to the Worker.
+- Later: a long-cache rule for `/assets/fonts/*` once fonts are self-hosted.
 - www → root redirect (see section 1).
 
 ### G. Optional upgrade: self-hosted showreel file
