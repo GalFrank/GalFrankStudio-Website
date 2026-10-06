@@ -100,7 +100,7 @@ export function buildEmail(l, env) {
     '<p style="margin:16px 0;white-space:pre-wrap;border-inline-start:3px solid #0479BA;padding-inline-start:12px">' + escapeHtml(l.message) + "</p>" +
     '<p><a href="' + wa + '" style="color:#0479BA">השיבו בוואטסאפ ←</a></p></div>';
   const msg = {
-    to: env.CONTACT_TO,
+    to: String(env.CONTACT_TO).trim().toLowerCase(), // Cloudflare compares with the verified address letter for letter
     from: { email: env.CONTACT_FROM || "website@galfrank.com", name: "GalFrankStudio website" },
     subject: "פנייה חדשה מהאתר: " + l.name,
     text: textBody,
