@@ -18,12 +18,17 @@ Last updated 2026-10-06. Keep this file current: tick items off and add new find
 - Done so far:
   - PR #1: headline invisible on phones (`fitHeadline()` measured a `display: contents` wrapper); repo files publicly downloadable on Cloudflare; Cloudflare PR preview builds failing.
   - Live showreel in the hero:
-    - The monitor "powers on" and zooms in on load, then the reel plays muted (YouTube IFrame API) with a pulsing "צפו עם סאונד" nudge.
-    - A click restarts it with sound.
+    - The frame is 5:4, the same shape as the reel (it was 16:9 with black bars at the sides).
+    - The monitor "powers on" and zooms in on load, then the reel plays muted (YouTube IFrame API). The sound button in the control bar reads "צפו עם סאונד" while it's muted; there is no big button over the picture.
+    - A click turns the sound on instantly, right where the reel is (no restart, so no buffering pause). It then plays to the end, goes round once more if sound came on mid-reel, and drops back to the muted loop.
+    - A click before YouTube has loaded shows a spinner at once; YouTube starts loading on the visitor's first touch or hover, not only after the page has loaded.
     - Pause / sound / full-screen controls; the timecode is the real video time; dragging the ruler or using the arrow keys seeks the video.
     - It pauses off-screen.
     - No autoplay for reduced motion or data saver; falls back to poster + play button if autoplay is refused.
   - Project videos play inside the feature frame instead of a pop-up. The pop-up (lightbox) is gone. One video with sound at a time.
+    - YouTube's own controls are off (`controls: 0`) and a click layer covers the player, so YouTube's title bar and buttons don't show. The frame has the site's own small controls instead: play/pause, sound, a progress bar you can drag (or arrow keys, 5 s), time, full screen. They fade out while the video plays and come back when the mouse moves; on phones they stay visible.
+    - Clicking the video pauses it: the frame blurs and dims under a play icon, which also hides YouTube's pause screen.
+    - If the browser refuses to start a video with sound (possible on iPhone), after 4 s the frame hands taps straight to YouTube's own play button.
   - The contact form posts to `/api/contact` (`worker/index.js`), which emails the owner. Email sending is switched off until the Gmail address is verified (see 3A); until then the form falls back to WhatsApp.
   - New Hebrew hero subtitle.
 
@@ -53,7 +58,7 @@ The owner doesn't use an @galfrank.com mailbox but wants forwarding, e.g. `hello
 
 ## 3. Site improvements (from the 2026-10-06 audit)
 
-Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, accessibility 96, best practices 96, SEO 100, desktop CLS 0.147. After the video and form work: 70 / 94, accessibility 97, CLS 0.012 mobile / 0.036 desktop.
+Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, accessibility 96, best practices 96, SEO 100, desktop CLS 0.147. After the video and form work: 70 / 94, accessibility 97, CLS 0.012 mobile / 0.036 desktop. After the 5:4 reel and custom controls: 69 / 97, accessibility 97, CLS 0 mobile / 0.03–0.08 desktop (varies run to run with font timing; the centred hero text moves when the web fonts arrive).
 
 ### A. Contact form → email (built; one step left)
 - `worker/index.js` handles `POST /api/contact`. It validates the fields, has spam traps (a hidden honeypot field and a "submitted in under 2 s" check), and emails the owner through the `send_email` binding.
@@ -138,7 +143,8 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
   - Widths 320, 390, 760, 820 and 1440, in Hebrew and English (`localStorage gf-lang` or `#en`), light and dark.
   - Pass criteria: no console errors and no horizontal overflow.
   - Also exercise the menu, popup, filters, form and language switch.
-- Video: the cloud sandbox can't stream YouTube video (googlevideo.com is blocked). Test the reel and project players against a stand-in `window.YT` (serve a mock at `https://www.youtube.com/iframe_api` via Playwright routing) that simulates states, time and seeking. Also run one smoke test against the real API, which loads and reports the duration.
+- Video: the cloud sandbox can't stream YouTube video (googlevideo.com is blocked). Test the reel and project players against a stand-in `window.YT` (serve a mock at `https://www.youtube.com/iframe_api` via Playwright routing) that simulates states, time, seeking and refused autoplay, and draws each video at its real shape (reel 5:4, FITME short 4:5, the rest 16:9). Also run one smoke test against the real API, which loads and reports the duration (in the sandbox it never plays, so the project frame ends in its YouTube-play-button fallback).
+- Not testable from the sandbox: real playback, and whether iPhone Safari lets the site's buttons turn sound on in YouTube's player. Check those on a real phone after each video change.
 - Contact Worker: `node --test` from the repo root.
 - Lighthouse and axe-core can be installed with npm in a scratch folder.
 - Cloud-session network allowlist used so far:

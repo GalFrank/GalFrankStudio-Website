@@ -108,7 +108,7 @@ header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; 
 .hero .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
 
 .monitor { min-width: 0; }
-.viewer { position: relative; aspect-ratio: 16 / 9; max-width: 100%; background: #08090C; border: 1px solid var(--line); overflow: hidden; cursor: pointer; display: block; width: 100%; color: #EDECE7; }
+.viewer { position: relative; aspect-ratio: 5 / 4; max-width: 100%; background: #08090C; border: 1px solid var(--line); overflow: hidden; cursor: pointer; display: block; width: 100%; color: #EDECE7; }
 .viewer .plate { position: absolute; inset: -20%; background:
   radial-gradient(40% 50% at 30% 40%, #1D6FA3 0%, transparent 70%),
   radial-gradient(35% 45% at 72% 62%, #8A2E7A 0%, transparent 70%),
@@ -124,9 +124,9 @@ header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; 
 @keyframes blink { 50% { opacity: .15; } }
 .tc { font-size: 15px; background: rgba(0,0,0,.55); padding: 3px 8px; border-radius: 3px; }
 .play { position: absolute; inset: 0; display: grid; place-items: center; }
-.play span { display: inline-flex; align-items: center; gap: 12px; font: 600 15px/1 var(--body); background: rgba(8,9,12,.6); border: 1px solid rgba(255,255,255,.35); padding: 14px 20px 14px 16px; border-radius: 40px; backdrop-filter: blur(6px); transition: background .2s, transform .2s; }
-.play svg { width: 18px; height: 18px; fill: currentColor; }
-.viewer:hover .play span { background: var(--accent); color: var(--accent-ink); border-color: transparent; transform: scale(1.04); }
+.play i { display: grid; place-items: center; width: 64px; height: 64px; border-radius: 50%; background: rgba(8,9,12,.5); border: 1px solid rgba(255,255,255,.4); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); transition: background .2s, color .2s, border-color .2s, transform .2s; }
+.play svg { width: 22px; height: 22px; margin-left: 3px; fill: currentColor; }
+.viewer:hover .play i { background: var(--accent); color: var(--accent-ink); border-color: transparent; transform: scale(1.06); }
 .ruler { position: relative; height: 34px; margin-block-start: 10px; border-block-start: 1px solid var(--line); direction: ltr;
   background: repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 10%) top / 100% 10px no-repeat,
               repeating-linear-gradient(90deg, var(--line) 0 1px, transparent 1px 2%) top / 100% 5px no-repeat; }
@@ -299,7 +299,7 @@ footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
 .viewer.scrubbing .rec::before { background: #EDECE7; animation: none; }
 .ruler:focus-visible { outline: 2px solid var(--accent); outline-offset: 6px; }
 
-/* showreel player. Layers: plate < video < poster < grain/safe/top hud < click layer < pill/nudge < controls.
+/* showreel player. Layers: plate < video < poster < grain/safe/top hud < click layer < play button/spinner < controls.
    The poster covers the video until it is really playing (and again on pause): YouTube shows its own
    title and "More videos" bar whenever a video isn't running. */
 /* while hidden the player is also shrunk: YouTube's own loading layout jumps inside its frame count toward the page's
@@ -307,18 +307,19 @@ footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
 .viewer .reel { position: absolute; inset: 0; z-index: 1; opacity: 0; transform: scale(.02); transition: opacity .5s; pointer-events: none; }
 .viewer .reel iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .viewer.live .reel { opacity: 1; transform: none; }
-.viewer .poster { z-index: 2; transition: opacity .6s, translate .4s cubic-bezier(.2,.8,.2,1); }
+/* YouTube's 480px still is a 16:9 picture with black bars inside a 4:3 image: zoom past the bars (the 1280px still has none) */
+.viewer .poster { z-index: 2; scale: 1.42; transition: opacity .6s, translate .4s cubic-bezier(.2,.8,.2,1); }
+.viewer .poster.hd { scale: 1.06; }
 .viewer .grain, .viewer .safe, .viewer .hud.t { z-index: 3; pointer-events: none; }
 .viewer.live .poster { opacity: 0; }
 .reel-hit { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; }
 .reel-hit:focus-visible, .thumb-hit:focus-visible { outline-offset: -5px; }
 .viewer .play { z-index: 5; pointer-events: none; transition: opacity .3s; }
-.viewer.live .play { opacity: 0; }
-.nudge { position: absolute; z-index: 5; left: 50%; bottom: 52px; translate: -50% 8px; display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; font: 600 14px/1 var(--body); color: #EDECE7; background: rgba(8,9,12,.62); border: 1px solid rgba(255,255,255,.35); padding: 11px 16px 11px 13px; border-radius: 40px; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); pointer-events: none; opacity: 0; transition: opacity .35s, translate .35s, background .2s, color .2s; }
-.nudge::after { content: ""; position: absolute; inset: -1px; border-radius: inherit; border: 2px solid var(--accent); animation: pulse 2.4s ease-out infinite; }
-.nudge svg { width: 18px; height: 18px; flex: 0 0 auto; }
-.viewer.live[data-mode="preview"] .nudge { opacity: 1; translate: -50% 0; }
-.viewer:hover .nudge { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+/* no play button while the muted autoplay is on its way (boot) or a click is loading (wait) */
+.viewer.live .play, .viewer.boot .play, .viewer.wait .play { opacity: 0; }
+.spin { position: absolute; z-index: 5; left: 50%; top: 50%; width: 34px; height: 34px; margin: -17px 0 0 -17px; border-radius: 50%; border: 2px solid rgba(255,255,255,.22); border-top-color: var(--accent); opacity: 0; pointer-events: none; transition: opacity .2s; animation: spin .8s linear infinite; }
+@keyframes spin { to { rotate: 360deg; } }
+.viewer.wait .spin { opacity: 1; }
 .viewer .hud.b { z-index: 6; pointer-events: none; }
 .hud-l { display: inline-flex; align-items: center; gap: 10px; }
 .rc { display: none; gap: 6px; align-items: center; }
@@ -327,6 +328,12 @@ footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
 .rc button:hover, .rc button:focus-visible { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
 .rc svg { width: 14px; height: 14px; fill: currentColor; }
 .rc .i-play { display: none; }
+/* while the reel plays muted, the sound button carries the "watch with sound" label */
+.rc .lbl { display: none; }
+.viewer[data-mode="preview"] .rc-snd { display: inline-flex; gap: 6px; white-space: nowrap; width: auto; padding: 0 10px 0 8px; font: 600 12px/1 var(--body); background: var(--accent); color: var(--accent-ink); border-color: transparent; animation: ring 2.2s ease-out infinite; }
+.viewer[data-mode="preview"] .rc-snd:hover, .viewer[data-mode="preview"] .rc-snd:focus-visible { background: #EDECE7; }
+.viewer[data-mode="preview"] .rc-snd .lbl { display: inline; }
+@keyframes ring { from { box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 70%, transparent); } to { box-shadow: 0 0 0 9px transparent; } }
 .viewer:not(.playing) .rc .i-play { display: block; }
 .viewer:not(.playing) .rc .i-pause { display: none; }
 .eq { display: none; align-items: flex-end; gap: 2px; height: 12px; }
@@ -338,7 +345,9 @@ footer nav { display: flex; gap: 20px; flex-wrap: wrap; }
 .viewer[data-mode="sound"]:not(.playing) .eq i { animation-play-state: paused; }
 .viewer:fullscreen { aspect-ratio: auto; width: 100%; height: 100%; border: 0; }
 .viewer:-webkit-full-screen { aspect-ratio: auto; width: 100%; height: 100%; border: 0; }
-@media (max-width: 420px) { .viewer.has-player .rec-l { display: none; } .nudge { bottom: 46px; font-size: 13px; padding: 10px 14px 10px 12px; } }
+@media (max-width: 420px) { .viewer.has-player .rec-l { display: none; } .viewer .tc { font-size: 13px; } }
+/* narrow phones: the timecode steps aside while the "watch with sound" label needs the room */
+@media (max-width: 380px) { .viewer.has-player[data-mode="preview"] .tc { display: none; } }
 
 /* showreel intro: the monitor powers on and grows into place on page load */
 @keyframes monitorIn { from { transform: scale(.84); opacity: 0; } 55% { opacity: 1; } to { transform: none; opacity: 1; } }
@@ -432,12 +441,44 @@ body.swap .bars { animation: barsFlick .32s steps(4) 1; }
 .feature:hover .fplay { transform: scale(1.06); }
 /* project videos play right inside the feature frame */
 .feature { cursor: default; }
+/* Layers: poster < video < pause scrim < play icon / click layer < controls. The video stays hidden (spinner over the poster)
+   until it really plays; the click layer keeps the pointer off YouTube's player so its own title and buttons never appear. */
 .thumb .vhost { position: absolute; inset: 0; z-index: 3; background: #000; opacity: 0; pointer-events: none; transition: opacity .4s; }
 .thumb .vhost iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
 .thumb-hit { position: absolute; inset: 0; z-index: 4; width: 100%; height: 100%; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; }
-.feature.playing .vhost { opacity: 1; pointer-events: auto; }
-.feature.playing .thumb-hit, .feature.playing .pl, .feature.playing .dur, .feature.playing .ptc, .feature.playing .bar { display: none; }
+.feature.live .vhost, .feature.native .vhost { opacity: 1; }
+.feature.playing .pl, .feature.playing .dur, .feature.playing .ptc, .feature.playing .bar { display: none; }
 .feature.playing .thumb { border-color: var(--accent); }
+.feature.wait .spin { opacity: 1; }
+/* paused: the frame blurs and dims under a play icon (this also covers YouTube's own pause screen) */
+.thumb .scrim { position: absolute; inset: 0; z-index: 3; background: rgba(8,9,12,.45); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); opacity: 0; pointer-events: none; transition: opacity .25s; }
+.feature.live.paused .scrim { opacity: 1; }
+.feature.live.paused .pl { display: grid; z-index: 4; opacity: 1; pointer-events: none; }
+/* sound playback refused (e.g. iPhone): taps go straight to YouTube's play button */
+.feature.native .vhost { pointer-events: auto; }
+.feature.native .thumb-hit, .feature.native .vctl { display: none; }
+.vctl { position: absolute; z-index: 5; inset-inline: 0; bottom: 0; display: none; align-items: center; gap: 8px; padding: 28px 12px 10px; background: linear-gradient(transparent, rgba(0,0,0,.6)); direction: ltr; opacity: 0; pointer-events: none; transition: opacity .3s; }
+.feature.live .vctl { display: flex; }
+.feature.live.ui .vctl, .feature.live.paused .vctl, .feature.live .vctl:focus-within { opacity: 1; pointer-events: auto; }
+@media (hover: none) { .feature.live .vctl { opacity: 1; pointer-events: auto; } }
+.feature.live:not(.ui):not(.paused) .thumb-hit { cursor: none; }
+.vctl button { display: grid; place-items: center; flex: 0 0 auto; width: 32px; height: 28px; margin: 0; padding: 0; border: 1px solid rgba(255,255,255,.3); border-radius: 3px; background: rgba(0,0,0,.55); color: #EDECE7; cursor: pointer; transition: background .2s, color .2s, border-color .2s; }
+.vctl button:hover, .vctl button:focus-visible { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.vctl svg { width: 14px; height: 14px; fill: currentColor; }
+.vctl .i-play, .vctl .i-off, .feature.paused .vctl .i-pause, .feature.muted .vctl .i-on { display: none; }
+.feature.paused .vctl .i-play, .feature.muted .vctl .i-off { display: block; }
+.vc-bar { position: relative; flex: 1 1 auto; min-width: 60px; height: 24px; cursor: pointer; touch-action: none; }
+.vc-bar::before, .vc-bar i { content: ""; position: absolute; top: 50%; height: 3px; margin-top: -1.5px; border-radius: 2px; transition: height .15s, margin .15s; }
+.vc-bar::before { inset-inline: 0; background: rgba(255,255,255,.28); }
+.vc-bar i { left: 0; width: calc(var(--vp, 0) * 100%); background: var(--accent); }
+.vc-bar i::after { content: ""; position: absolute; right: -6px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: var(--accent); scale: 0; transition: scale .15s; }
+.vc-bar:hover::before, .vc-bar:hover i, .vc-bar.scrub::before, .vc-bar.scrub i { height: 5px; margin-top: -2.5px; }
+.vc-bar:hover i::after, .vc-bar.scrub i::after, .vc-bar:focus-visible i::after { scale: 1; }
+.vc-bar:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.vc-time { flex: 0 0 auto; font: 500 12px/1 var(--mono); color: #EDECE7; background: rgba(0,0,0,.55); padding: 7px 8px; border-radius: 3px; font-variant-numeric: tabular-nums; }
+.thumb:fullscreen { aspect-ratio: auto; width: 100%; height: 100%; border: 0; }
+.thumb:-webkit-full-screen { aspect-ratio: auto; width: 100%; height: 100%; border: 0; }
+@media (max-width: 480px) { .vctl { gap: 6px; padding: 24px 8px 8px; } .vc-time { font-size: 11px; padding: 6px; } }
 .fplay .i-stop, .feature.playing .fplay .i-play { display: none; }
 .feature.playing .fplay .i-stop { display: block; }
 .swapin { animation: swapIn .45s cubic-bezier(.2,.8,.2,1) both; }
@@ -627,14 +668,13 @@ body.menu-open .wa-fab, body.menu-open .cur { display: none; }
           <div class="reel" aria-hidden="true"><div id="reelPlayer"></div></div>
           <img class="poster" id="reelPoster" src="https://i.ytimg.com/vi/o4o1LXvFJ8A/hqdefault.jpg" alt="" onerror="this.remove()">
           <div class="grain"></div><div class="safe"></div>
-          <div class="hud t" aria-hidden="true"><span class="rec">GF_REEL_2026</span><span>25 FPS · 1920×1080</span></div>
+          <div class="hud t" aria-hidden="true"><span class="rec">GF_REEL_2026</span><span>25 FPS · 5:4</span></div>
           <button class="reel-hit" id="reelHit" type="button" data-reel="hit" aria-label="Watch Showreel 2026 with sound"></button>
-          <div class="play" aria-hidden="true"><span><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg><span data-i18n="reel.label">שואוריל 2026</span></span></div>
-          <span class="nudge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5v5h3.5L12 18.5v-13L7.5 9.5z" fill="currentColor"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6M18.5 6a8.5 8.5 0 0 1 0 12"/></svg><span data-i18n="reel.sound">צפו עם סאונד</span></span>
+          <div class="play" aria-hidden="true"><i><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></i></div><span class="spin" aria-hidden="true"></span>
           <div class="hud b">
             <span class="hud-l"><span class="rec-l" aria-hidden="true">REC.709</span><span class="rc">
               <button class="rc-play" type="button" data-reel="toggle" aria-label="Pause"><svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg><svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></button>
-              <button class="rc-snd" type="button" data-reel="snd" aria-label="Sound on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9z"/><path d="M16 9.5l5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span></button>
+              <button class="rc-snd" type="button" data-reel="snd" aria-label="Sound on"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9z"/><path d="M16 9.5l5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg><span class="eq" aria-hidden="true"><i></i><i></i><i></i></span><span class="lbl" dir="auto" data-i18n="reel.sound">צפו עם סאונד</span></button>
               <button class="rc-fs" type="button" data-reel="fs" aria-label="Full screen"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>
             </span></span>
             <span class="tc mono" id="tc" aria-hidden="true">00:00:00:00</span>
@@ -755,7 +795,7 @@ const CONFIG = {
   phoneDisplay: "054-925-4435",
   email: "GalFrankStudio@gmail.com",
   instagram: "galfrankstudio",      // without the @
-  showreel: "https://youtu.be/o4o1LXvFJ8A",   // YouTube link; plays muted in the hero, a click restarts it with sound
+  showreel: "https://youtu.be/o4o1LXvFJ8A",   // YouTube link; plays muted in the hero, a click turns the sound on. The hero frame is 5:4 to match it (.viewer aspect-ratio)
   formEndpoint: "/api/contact",      // the site's own Cloudflare Worker (worker/index.js) emails each inquiry; if it fails, visitors get the WhatsApp option
   clients: [{"key": "elal", "name": "EL AL"}, {"key": "intel", "name": "Intel"}, {"key": "leumit", "name": "Leumit"}, {"key": "adidas", "name": "adidas"}, {"key": "bezeq", "name": "Bezeq"}, {"key": "bayer", "name": "Bayer"}, {"key": "shufersal", "name": "Shufersal"}, {"key": "amdocs", "name": "Amdocs"}, {"key": "chery", "name": "Chery"}, {"key": "isuzu", "name": "Isuzu"}],
   // Projects: yt = YouTube link. cat = commercial | corporate | motion | social. dur is optional ("0:30").
@@ -810,7 +850,7 @@ const T = {
     "d.wa": "וואטסאפ", "d.email": "אימייל", "d.ig": "אינסטגרם", "copy": "העתקה", "copied": "הועתק",
     "footer.copy": "© 2026 גל פרנק סטודיו",
     "reel.sound": "צפו עם סאונד", "reel.watch": "צפייה בשואוריל 2026 עם סאונד", "reel.pause": "השהיה", "reel.resume": "המשך ניגון", "reel.unmute": "הפעלת סאונד", "reel.mute": "השתקה", "reel.fs": "מסך מלא", "reel.ruler": "ציר הזמן של השואוריל",
-    "proj.play": "נגן", "proj.stop": "עצירה", "proj.aria": "ניגון הסרטון: ",
+    "proj.play": "נגן", "proj.stop": "עצירה", "proj.aria": "ניגון הסרטון: ", "proj.seek": "ציר הזמן של הסרטון",
     "wa.hello": "היי גל, הגעתי מהאתר.",
     "scrub.hint": "גררו לסריקה ⟷", "swipe": "החליקו לעוד ←", "cur.play": "נגן", "cur.drag": "גרור", "cur.view": "צפייה", "f.exporting": "מייצא",
     types: ["פרסומת / סרט תדמית", "רילס וסושיאל", "מושן גרפיקס", "תוכן AI", "אחר"],
@@ -854,7 +894,7 @@ const T = {
     "d.wa": "WhatsApp", "d.email": "Email", "d.ig": "Instagram", "copy": "Copy", "copied": "Copied",
     "footer.copy": "© 2026 Gal Frank Studio",
     "reel.sound": "Watch with sound", "reel.watch": "Watch Showreel 2026 with sound", "reel.pause": "Pause", "reel.resume": "Play", "reel.unmute": "Sound on", "reel.mute": "Mute", "reel.fs": "Full screen", "reel.ruler": "Showreel timeline",
-    "proj.play": "Play", "proj.stop": "Stop", "proj.aria": "Play video: ",
+    "proj.play": "Play", "proj.stop": "Stop", "proj.aria": "Play video: ", "proj.seek": "Video timeline",
     "wa.hello": "Hi Gal, I found you through your website.",
     "scrub.hint": "Drag to scrub ⟷", "swipe": "Swipe for more →", "cur.play": "PLAY", "cur.drag": "DRAG", "cur.view": "VIEW", "f.exporting": "Exporting",
     types: ["Commercial / brand film", "Reels & social", "Motion graphics", "AI content", "Other"],
@@ -951,6 +991,16 @@ function thumbHTML(p, cls, big) {
 function metaHTML(p, withRole) { return (p.client ? "<span>" + esc(p.client) + '</span><span class="dot"></span>' : "") + "<span>" + t("cat." + p.cat) + "</span>" + (withRole && p.role ? '<span class="dot"></span><span class="role">' + esc(p.role[lang]) + "</span>" : ""); }
 const PLAY_SVG = '<svg class="i-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>';
 const STOP_SVG = '<svg class="i-stop" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6h12v12H6z"/></svg>';
+const PAUSE_SVG = '<svg class="i-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4v16H6zM14 4h4v16h-4z"/></svg>';
+/* the site's own small player controls (YouTube's are switched off) */
+const VCTL_HTML = '<div class="vctl">' +
+  '<button class="vc-play" type="button" data-vc="toggle">' + PAUSE_SVG + PLAY_SVG + '</button>' +
+  '<button class="vc-snd" type="button" data-vc="snd"><svg class="i-on" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9z"/><path d="M15.5 9a4.5 4.5 0 0 1 0 6M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2"/></svg>' +
+    '<svg class="i-off" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9v6h4l5 4V5L7 9z"/><path d="M16 9.5l5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>' +
+  '<div class="vc-bar" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="0" aria-valuenow="0"><i></i></div>' +
+  '<span class="vc-time" aria-hidden="true">0:00</span>' +
+  '<button class="vc-fs" type="button" data-vc="fs"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2"/></svg></button>' +
+  "</div>";
 function renderFeature(anim) {
   stopProject();
   const p = CONFIG.projects[sel];
@@ -959,7 +1009,8 @@ function renderFeature(anim) {
       thumbHTML(p, "thumb", true) +
       (p.dur ? '<span class="dur">' + esc(p.dur) + '</span><span class="ptc">00:00:00</span>' : "") + '<div class="bar"><i></i></div>' +
       '<div class="pl" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></div>' +
-      '<div class="vhost"></div><button class="thumb-hit" type="button" data-play="' + sel + '" data-cursor="play"></button></div>' +
+      '<div class="vhost"></div><div class="scrim"></div><span class="spin" aria-hidden="true"></span>' +
+      '<button class="thumb-hit" type="button" data-play="' + sel + '" data-cursor="play"></button>' + VCTL_HTML + "</div>" +
       '<div class="fmeta"><div><h3></h3><div class="meta"></div></div>' +
       '<button class="fplay" type="button" data-play="' + sel + '">' + PLAY_SVG + STOP_SVG + "<span></span></button></div>" +
     "</div>";
@@ -975,6 +1026,7 @@ function relabelFeature() {
   card.querySelector(".fplay span").textContent = t(playing ? "proj.stop" : "proj.play");
   card.querySelector(".fplay").setAttribute("aria-label", t(playing ? "proj.stop" : "proj.play") + ": " + p[lang]);
   const f = card.querySelector(".vhost iframe"); if (f) f.title = p[lang];
+  if (playing) projUI();
   syncListHeight();
 }
 function renderGrid() {
@@ -1006,16 +1058,21 @@ function pick(i) {
 }
 addEventListener("resize", () => syncListHeight());
 
-/* project videos play inside the feature frame (YouTube player with its own controls) */
-const proj = { player: null, idx: null };
-const projectAudio = { yieldAudio() { try { if (proj.player && proj.player.getPlayerState() === 1) proj.player.pauseVideo(); } catch (e) {} } };
+/* project videos play inside the feature frame. YouTube's controls are off and a click layer sits over the video,
+   so its title bar and buttons never show; the frame has the site's own small controls instead. */
+const proj = { player: null, idx: null, ready: false, started: false, state: -1, dur: 0, muted: false,
+  base: 0, baseAt: 0, scrubT: null, raf: 0, uiTimer: 0, watchdog: 0, revealTimer: 0 };
+const projectAudio = { yieldAudio() { try { if (proj.ready && (proj.state === 1 || proj.state === 3)) proj.player.pauseVideo(); } catch (e) {} } };
+const durSecs = (d) => { const m = String(d || "").match(/(\d+):(\d+)$/); return m ? +m[1] * 60 + +m[2] : 0; };
+const mmss = (s) => Math.floor(s / 60) + ":" + pad(Math.floor(s % 60));
+const projCard = () => { const c = $("#featWrap .feature"); return c && c.classList.contains("playing") ? c : null; };
 function playProject(i) {
   const p = CONFIG.projects[i], id = ytId(p.yt), card = $("#featWrap .feature");
   if (!id || ytFailed) { if (p.yt || p.url) window.open(p.yt || p.url, "_blank", "noopener"); return; }
   if (!card || (proj.idx === i && card.classList.contains("playing"))) return;
   stopProject();
-  proj.idx = i;
-  card.classList.add("playing"); card.style.transform = "";
+  Object.assign(proj, { idx: i, ready: false, started: false, state: -1, dur: durSecs(p.dur), muted: false, base: 0, baseAt: 0, scrubT: null });
+  card.classList.add("playing", "wait"); card.style.transform = "";
   relabelFeature();
   claimAudio(projectAudio);
   loadYT().then((YT) => {
@@ -1023,21 +1080,132 @@ function playProject(i) {
     const host = card.querySelector(".vhost"); host.innerHTML = "<div></div>";
     proj.player = new YT.Player(host.firstChild, {
       width: "100%", height: "100%", videoId: id,
-      playerVars: ytVars({ autoplay: 1, playsinline: 1, rel: 0, iv_load_policy: 3 }),
+      playerVars: ytVars({ autoplay: 1, controls: 0, disablekb: 1, fs: 0, playsinline: 1, rel: 0, iv_load_policy: 3 }),
       events: {
-        onReady: (e) => { try { e.target.getIframe().title = p[lang]; e.target.playVideo(); } catch (err) {} },
-        onStateChange: (e) => { if (e.data === 1) claimAudio(projectAudio); else if (e.data === 0) stopProject(); },
+        onReady: (e) => {
+          if (e.target !== proj.player) return;
+          proj.ready = true;
+          try { const f = e.target.getIframe(); f.title = p[lang]; f.tabIndex = -1; const d = e.target.getDuration(); if (d > 1) proj.dur = d; e.target.playVideo(); } catch (err) {}
+          projUI(); projKick();
+        },
+        onStateChange: onProjState,
         onError: () => { stopProject(); window.open(p.yt, "_blank", "noopener"); }
       }
     });
+    /* playback with sound can be refused (e.g. iPhone): let taps reach YouTube's own play button (still buffering = keep waiting) */
+    const check = () => {
+      if (proj.idx !== i || proj.started || !card.isConnected) return;
+      if (proj.state === 3) { proj.watchdog = setTimeout(check, 2000); return; }
+      card.classList.remove("wait"); card.classList.add("native");
+    };
+    proj.watchdog = setTimeout(check, 4000);
   }, () => { stopProject(); window.open(p.yt, "_blank", "noopener"); });
+}
+function onProjState(e) {
+  const card = projCard(); if (!card || e.target !== proj.player) return;
+  proj.state = e.data;
+  if (e.data === 0) { stopProject(); return; }
+  if (e.data === 1) {
+    proj.started = true; clearTimeout(proj.watchdog); claimAudio(projectAudio);
+    /* started from YouTube's own play button: it's already on screen, so switch to the site's controls at once */
+    if (card.classList.contains("native")) { card.classList.remove("native", "wait"); card.classList.add("live"); }
+    const d = proj.player.getDuration(); if (d > 1) proj.dur = d;
+    /* a short beat before showing the video hides YouTube's start-up title */
+    if (!card.classList.contains("live")) { clearTimeout(proj.revealTimer); proj.revealTimer = setTimeout(() => { if (projCard() === card) { card.classList.add("live"); card.classList.remove("wait"); projShowUI(); } }, 300); }
+  }
+  projUI(); projKick();
+}
+function projUI() {
+  const card = projCard(); if (!card) return;
+  const playing = proj.state === 1 || proj.state === 3;
+  card.classList.toggle("paused", proj.started && !playing);
+  card.classList.toggle("muted", proj.muted);
+  const label = (sel, k) => card.querySelector(sel).setAttribute("aria-label", t(k));
+  label(".vc-play", playing ? "reel.pause" : "reel.resume");
+  label(".vc-snd", proj.muted ? "reel.unmute" : "reel.mute");
+  label(".vc-fs", "reel.fs"); card.querySelector(".vc-fs").hidden = !FS_OK;
+  label(".vc-bar", "proj.seek");
+  card.querySelector(".vc-bar").setAttribute("aria-valuemax", Math.round(proj.dur));
+  label(".thumb-hit", playing ? "reel.pause" : "reel.resume");
+}
+function projTime() {
+  if (proj.scrubT != null) return proj.scrubT;
+  if (!proj.ready) return 0;
+  const cur = proj.player.getCurrentTime() || 0, now = performance.now();
+  if (proj.state !== 1 || cur !== proj.base) { proj.base = cur; proj.baseAt = now; return cur; }
+  return Math.min(cur + (now - proj.baseAt) / 1000, cur + 0.6, proj.dur || cur);
+}
+let projAriaAt = 0;
+function projTick() {
+  proj.raf = 0;
+  const card = projCard(); if (!card) return;
+  const s = projTime(), d = proj.dur, now = performance.now();
+  card.querySelector(".vc-bar").style.setProperty("--vp", d ? clamp(s / d, 0, 1) : 0);
+  const txt = mmss(s) + (d ? " / " + mmss(d) : ""), el = card.querySelector(".vc-time");
+  if (el.textContent !== txt) el.textContent = txt;
+  if (now - projAriaAt > 500) { projAriaAt = now; const b = card.querySelector(".vc-bar"); b.setAttribute("aria-valuenow", Math.round(s)); b.setAttribute("aria-valuetext", mmss(s)); }
+  if (proj.state === 1 || proj.scrubT != null) proj.raf = requestAnimationFrame(projTick);
+}
+function projKick() { if (!proj.raf) proj.raf = requestAnimationFrame(projTick); }
+/* controls fade out while the video plays and the pointer rests; they come back on any movement */
+function projShowUI() {
+  const card = projCard(); if (!card) return;
+  card.classList.add("ui"); clearTimeout(proj.uiTimer);
+  proj.uiTimer = setTimeout(() => card.classList.remove("ui"), 2500);
+}
+function projToggle() {
+  if (!proj.ready) return;
+  if (proj.state === 1 || proj.state === 3) proj.player.pauseVideo();
+  else { claimAudio(projectAudio); if (!proj.muted) proj.player.unMute(); proj.player.playVideo(); }
+}
+function projControl(a) {
+  if (a === "fs") { const th = $("#featWrap .feature .thumb"); if (th) toggleFullscreen(th); }
+  else if (!proj.ready) return;
+  else if (a === "toggle") projToggle();
+  else if (a === "snd") { proj.muted = !proj.muted; if (proj.muted) proj.player.mute(); else { proj.player.unMute(); proj.player.setVolume(100); } projUI(); }
+  projShowUI();
+}
+function projSeek(s, final) {
+  proj.scrubT = final ? null : s;
+  const now = performance.now();
+  if (proj.ready && (final || now - (proj.seekAt || 0) > 120)) { proj.seekAt = now; proj.player.seekTo(s, !!final); proj.base = s; proj.baseAt = now; }
+  projKick();
+}
+function initProjControls() {
+  const fw = $("#featWrap");
+  let bar = null;
+  const at = (e) => { const r = bar.getBoundingClientRect(); return clamp((e.clientX - r.left) / r.width, 0, 0.999) * proj.dur; };
+  fw.addEventListener("pointerdown", (e) => { const b = e.target.closest(".vc-bar"); if (!b || !proj.ready || !proj.dur) return; bar = b; b.setPointerCapture(e.pointerId); b.classList.add("scrub"); projSeek(at(e)); });
+  fw.addEventListener("pointermove", (e) => { if (bar && proj.scrubT != null) projSeek(at(e)); if (e.target.closest(".thumb")) projShowUI(); });
+  const end = () => { if (!bar) return; bar.classList.remove("scrub"); if (proj.scrubT != null) projSeek(proj.scrubT, true); bar = null; };
+  fw.addEventListener("pointerup", end); fw.addEventListener("pointercancel", end);
+  fw.addEventListener("keydown", (e) => {
+    if (!e.target.closest(".vc-bar") || !proj.ready) return;
+    const step = { ArrowRight: 5, ArrowUp: 5, ArrowLeft: -5, ArrowDown: -5, PageUp: 30, PageDown: -30 }[e.key];
+    let s = projTime();
+    if (step) s += step; else if (e.key === "Home") s = 0; else if (e.key === "End") s = proj.dur - 1; else return;
+    e.preventDefault(); projSeek(clamp(s, 0, Math.max(0, proj.dur - 0.5)), true); projShowUI();
+  });
 }
 function stopProject() {
   if (proj.player) { try { proj.player.destroy(); } catch (e) {} proj.player = null; }
-  proj.idx = null;
+  clearTimeout(proj.watchdog); clearTimeout(proj.revealTimer); clearTimeout(proj.uiTimer);
+  if (proj.raf) { cancelAnimationFrame(proj.raf); proj.raf = 0; }
+  Object.assign(proj, { idx: null, ready: false, started: false, state: -1, scrubT: null });
   if (audioOwner === projectAudio) audioOwner = null;
   const card = $("#featWrap .feature");
-  if (card && card.classList.contains("playing")) { card.classList.remove("playing"); card.querySelector(".vhost").innerHTML = ""; relabelFeature(); }
+  if (card && card.classList.contains("playing")) {
+    if (document.fullscreenElement && card.contains(document.fullscreenElement)) exitFullscreen();
+    card.classList.remove("playing", "live", "wait", "paused", "muted", "native", "ui"); card.querySelector(".vhost").innerHTML = ""; relabelFeature();
+  }
+}
+function exitFullscreen() { const x = document.exitFullscreen || document.webkitExitFullscreen; if (x) { const r = x.call(document); if (r && r.catch) r.catch(() => {}); } }
+/* true when this call entered full screen */
+function toggleFullscreen(el) {
+  if (document.fullscreenElement || document.webkitFullscreenElement) { exitFullscreen(); return false; }
+  const go = el.requestFullscreen || el.webkitRequestFullscreen; if (!go) return false;
+  const r = go.call(el); if (r && r.catch) r.catch(() => {});
+  return true;
 }
 
 function setLang(l) {
@@ -1154,12 +1322,13 @@ function loadYT() {
 let audioOwner = null;
 function claimAudio(owner) { if (audioOwner && audioOwner !== owner) audioOwner.yieldAudio(); audioOwner = owner; }
 
-/* hero showreel: plays muted after the intro, a click restarts it with sound. Modes: idle (poster),
-   preview (muted loop + "watch with sound" nudge), sound (full playback with controls). */
+/* hero showreel: plays muted after the intro, a click turns the sound on right where it is. Modes: idle (poster),
+   preview (muted loop; the sound button reads "watch with sound"), sound (one full pass with sound, then back to the muted loop). */
 const REEL_LEN = 41; // fallback length in seconds until YouTube reports the real one
 const FS_OK = !!(document.fullscreenEnabled || document.webkitFullscreenEnabled);
 const reel = { id: ytId(CONFIG.showreel), player: null, ready: false, mode: "idle", state: -1, dur: REEL_LEN, queued: null,
-  base: 0, baseAt: 0, scrubT: null, pendingSeek: null, inView: true, resume: false, loopAt: 0, revealTimer: 0, watchdog: 0 };
+  base: 0, baseAt: 0, scrubT: null, pendingSeek: null, inView: true, resume: false, loopAt: 0, revealTimer: 0, watchdog: 0,
+  waiting: false, soundFrom: 0, wrapped: false };
 const reelAudio = { yieldAudio() { if (reel.mode === "sound" && reel.state === 1) reel.player.pauseVideo(); } };
 
 function setReelMode(m) { reel.mode = m; $("#viewer").dataset.mode = m; updateReelUI(); }
@@ -1168,9 +1337,10 @@ function updateReelUI() {
   const playing = reel.state === 1, sound = reel.mode === "sound";
   v.classList.toggle("playing", playing);
   v.classList.toggle("has-player", reel.ready);
+  v.classList.toggle("wait", reel.waiting && !playing);
   $("#reelHit").setAttribute("aria-label", sound ? t(playing ? "reel.pause" : "reel.resume") : t("reel.watch"));
   v.querySelector(".rc-play").setAttribute("aria-label", t(playing ? "reel.pause" : "reel.resume"));
-  v.querySelector(".rc-snd").setAttribute("aria-label", t(sound ? "reel.mute" : "reel.unmute"));
+  v.querySelector(".rc-snd").setAttribute("aria-label", t(sound ? "reel.mute" : reel.mode === "preview" ? "reel.sound" : "reel.unmute"));
   v.querySelector(".rc-fs").setAttribute("aria-label", t("reel.fs"));
   v.querySelector(".rc-fs").hidden = !FS_OK;
 }
@@ -1178,7 +1348,7 @@ function updateReelUI() {
 function setLive(on, delay) {
   clearTimeout(reel.revealTimer);
   if (!on) { $("#viewer").classList.remove("live"); return; }
-  reel.revealTimer = setTimeout(() => { if (reel.state === 1) $("#viewer").classList.add("live"); }, delay);
+  reel.revealTimer = setTimeout(() => { if (reel.state === 1) { $("#viewer").classList.add("live"); endBoot(); } }, delay);
 }
 function ensureReel(next) {
   if (next === "sound" || !reel.queued) reel.queued = next;
@@ -1189,10 +1359,12 @@ function ensureReel(next) {
       width: "100%", height: "100%", videoId: reel.id,
       playerVars: ytVars({ autoplay: 0, mute: 1, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, playsinline: 1, rel: 0 }),
       /* e.g. embedding disabled: keep the poster, and the next click opens the reel on YouTube */
-      events: { onReady: onReelReady, onStateChange: onReelState, onError: () => { reel.failed = true; reel.ready = false; setReelMode("idle"); setLive(false); } }
+      events: { onReady: onReelReady, onStateChange: onReelState, onError: () => { reel.failed = true; reel.ready = false; reel.waiting = false; endBoot(); setReelMode("idle"); setLive(false); } }
     });
-  }, () => {});
+  }, () => { reel.waiting = false; endBoot(); updateReelUI(); });
 }
+/* the play button stays hidden while the muted autoplay is on its way; it shows if autoplay doesn't happen */
+function endBoot() { $("#viewer").classList.remove("boot"); }
 function onReelReady(e) {
   reel.ready = true;
   const d = e.target.getDuration(); if (d > 1) { reel.dur = d; buildRulerLabels(); }
@@ -1203,7 +1375,7 @@ function onReelReady(e) {
 }
 function onReelState(e) {
   reel.state = e.data;
-  if (e.data === 1) { clearTimeout(reel.watchdog); setLive(true, reel.mode === "sound" ? 350 : 900); kickReel(); }
+  if (e.data === 1) { clearTimeout(reel.watchdog); reel.waiting = false; setLive(true, reel.mode === "sound" ? 200 : 900); kickReel(); }
   else if (e.data !== 3) setLive(false);
   if (e.data === 0) { reelLoop(); reel.player.playVideo(); }
   updateReelUI();
@@ -1217,16 +1389,26 @@ function startReelPreview() {
   p.playVideo();
   /* autoplay can be refused (iOS Low Power Mode, browser settings): fall back to the poster + play button */
   clearTimeout(reel.watchdog);
-  reel.watchdog = setTimeout(() => { if (reel.mode === "preview" && reel.state !== 1 && reel.state !== 3) setReelMode("idle"); }, 5000);
+  reel.watchdog = setTimeout(() => { if (reel.mode === "preview" && reel.state !== 1 && reel.state !== 3) { endBoot(); setReelMode("idle"); } }, 5000);
 }
+/* sound comes on right where the muted loop is: no seek, so no wait for YouTube to buffer the start again.
+   It then plays through, goes round once more if it started mid-reel, and drops back to the muted loop. */
 function startReelSound() {
   if (!reel.id || ytFailed || reel.failed) return window.open(CONFIG.showreel, "_blank", "noopener");
-  if (!reel.ready) { setReelMode("sound"); return ensureReel("sound"); }
+  if (!reel.ready) { reel.waiting = true; setReelMode("sound"); return ensureReel("sound"); }
   claimAudio(reelAudio);
+  const p = reel.player, playing = reel.state === 1;
+  p.unMute(); p.setVolume(100);
+  if (reel.pendingSeek != null) { p.seekTo(reel.pendingSeek, true); reel.pendingSeek = null; }
+  else if (!playing && reelTime() >= reel.dur - 1) p.seekTo(0, true);
+  reel.soundFrom = reelTime(); reel.wrapped = false;
+  if (!playing) {
+    reel.waiting = true; p.playVideo();
+    /* playback with sound can be refused (e.g. iPhone): play muted instead, the sound button stays one tap away */
+    clearTimeout(reel.watchdog);
+    reel.watchdog = setTimeout(() => { if (reel.state !== 1 && reel.state !== 3) { reel.waiting = false; endBoot(); startReelPreview(); } }, 4000);
+  }
   setReelMode("sound");
-  const p = reel.player;
-  p.unMute(); p.setVolume(100); p.seekTo(0, true); p.playVideo();
-  reel.base = 0; reel.baseAt = performance.now(); reel.pendingSeek = null;
   kickReel();
 }
 function toggleReel() {
@@ -1241,16 +1423,14 @@ function reelSoundToggle() {
   reel.player.mute(); setReelMode("preview");
   if (audioOwner === reelAudio) audioOwner = null;
 }
-function reelFullscreen() {
-  const v = $("#viewer");
-  if (document.fullscreenElement || document.webkitFullscreenElement) (document.exitFullscreen || document.webkitExitFullscreen).call(document);
-  else { const r = (v.requestFullscreen || v.webkitRequestFullscreen).call(v); if (r && r.catch) r.catch(() => {}); if (reel.mode !== "sound") startReelSound(); }
-}
-/* loop just before the end so YouTube's end screen never shows; after a full watch with sound go back to the muted loop */
+function reelFullscreen() { if (toggleFullscreen($("#viewer")) && reel.mode !== "sound") startReelSound(); }
+/* loop just before the end so YouTube's end screen never shows; after a full pass with sound go back to the muted loop */
 function reelLoop() {
   const now = performance.now(); if (now - reel.loopAt < 1500) return; reel.loopAt = now;
   reel.player.seekTo(0, true); reel.base = 0; reel.baseAt = now;
-  if (reel.mode === "sound") { reel.player.mute(); setReelMode("preview"); if (audioOwner === reelAudio) audioOwner = null; }
+  if (reel.mode !== "sound") return;
+  if (reel.soundFrom > 2 && !reel.wrapped) { reel.wrapped = true; return; }
+  reel.player.mute(); setReelMode("preview"); if (audioOwner === reelAudio) audioOwner = null;
 }
 /* YouTube reports time in steps; interpolate between reports so the timecode counts every frame */
 function reelTime() {
@@ -1312,14 +1492,19 @@ function initReel() {
   if (!reel.id) return;
   /* sharper poster when YouTube has a full-HD still */
   const poster = $("#reelPoster");
-  if (poster) { const hi = new Image(); hi.onload = () => { if (hi.naturalWidth > 120) poster.src = hi.src; }; hi.src = ytThumb(CONFIG.showreel, "maxresdefault"); }
+  if (poster) { const hi = new Image(); hi.onload = () => { if (hi.naturalWidth > 120) { poster.src = hi.src; poster.classList.add("hd"); } }; hi.src = ytThumb(CONFIG.showreel, "maxresdefault"); }
   if ("IntersectionObserver" in window) new IntersectionObserver(([en]) => { reel.inView = en.intersectionRatio >= 0.25; reelVisibility(); }, { threshold: [0, 0.25, 0.5] }).observe(v);
   document.addEventListener("visibilitychange", reelVisibility);
-  /* start once the page, its fonts and the intro zoom are done, so YouTube's ~1MB player never competes with the first paint;
-     no autoplay for reduced motion or data saver */
-  const go = () => { if (SAVE_DATA) return; loadYT(); if (!REDUCE) ensureReel("preview"); };
+  /* start once the page, its fonts and the intro zoom are done, so YouTube's ~1MB player never competes with the first paint
+     (or sooner, as soon as the visitor touches the page); no autoplay for reduced motion or data saver */
+  const auto = !REDUCE && !SAVE_DATA;
+  if (auto) { v.classList.add("boot"); setTimeout(endBoot, 12000); }
+  let started = false;
+  const go = () => { if (started || SAVE_DATA) return; started = true; loadYT(); if (auto) ensureReel("preview"); };
   const loaded = document.readyState === "complete" ? Promise.resolve() : new Promise((r) => addEventListener("load", r, { once: true }));
   Promise.all([loaded, document.fonts ? document.fonts.ready : null]).then(() => setTimeout(go, 900));
+  ["pointerdown", "keydown"].forEach((ev) => addEventListener(ev, go, { once: true, passive: true }));
+  v.addEventListener("pointerenter", go, { once: true });
 }
 
 /* submit: "exporting" progress on the button; holds near the end until the send finishes */
@@ -1469,10 +1654,14 @@ document.addEventListener("click", (e) => {
   }
   const pk = e.target.closest("[data-pick]");
   if (pk) { pick(+pk.dataset.pick); return; }
+  const vc = e.target.closest("[data-vc]");
+  if (vc) { projControl(vc.dataset.vc); return; }
   const pl = e.target.closest("[data-play]");
   if (pl) {
-    const i = +pl.dataset.play, card = pl.closest(".feature");
-    if (pl.classList.contains("fplay") && card && card.classList.contains("playing")) stopProject(); else playProject(i);
+    const i = +pl.dataset.play, card = pl.closest(".feature"), playing = card && card.classList.contains("playing");
+    if (playing && pl.classList.contains("fplay")) stopProject();
+    else if (playing) { if (card.classList.contains("live")) { projToggle(); projShowUI(); } }
+    else playProject(i);
   }
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("#mnav").hidden) setMenu(false); });
@@ -1495,6 +1684,7 @@ if (location.hash === "#en") initial = "en";
 setLang(initial);
 booted = true;
 initReel();
+initProjControls();
 initInteractions();
 /* a project video stops when its frame scrolls fully out of view */
 if ("IntersectionObserver" in window) new IntersectionObserver(([en]) => { if (!en.isIntersecting) projectAudio.yieldAudio(); }).observe($("#featWrap"));
