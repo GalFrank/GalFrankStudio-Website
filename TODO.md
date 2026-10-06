@@ -32,7 +32,7 @@ Last updated 2026-10-06. Keep this file current: tick items off and add new find
     - Still possible: end-screen elements an uploader adds in YouTube Studio (last 5–20 s of a video) draw over the picture. Remove end screens on these videos in YouTube Studio if they show up.
     - Clicking the video pauses it: the frame blurs and dims under a play icon, which also hides YouTube's pause screen.
     - If the browser refuses to start a video with sound (possible on iPhone), after 4 s the frame hands taps straight to YouTube's own play button.
-  - The contact form posts to `/api/contact` (`worker/index.js`), which emails the owner. Email sending is switched off until the Gmail address is verified (see 3A); until then the form falls back to WhatsApp.
+  - The contact form posts to `/api/contact` (`worker/index.js`), which emails the owner. Email sending was switched on 2026-10-06, after the owner verified the Gmail address in Email Routing (see 3A). If sending fails, the form falls back to WhatsApp.
   - New Hebrew hero subtitle.
 
 ## 1. Domain move (done 2026-10-06)
@@ -68,7 +68,9 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
   - Sending to a verified Email Routing destination is free on Workers Free.
   - Reply-To is the visitor's email; the email includes a wa.me link.
 - The page shows "Message received" only when the Worker answers `{ ok: true }`. Otherwise (not configured, error, 12 s timeout) it offers WhatsApp with all the details.
-- **Remaining step:** once `GalFrankStudio@gmail.com` is verified in Email Routing (section 2), uncomment the `send_email` line in `wrangler.jsonc`, merge, then send a real test inquiry. Cloudflare may refuse to deploy the binding before the address is verified.
+- **Switched on (2026-10-06):** `GalFrankStudio@gmail.com` is a verified Email Routing destination, and the `send_email` binding in `wrangler.jsonc` is enabled with `destination_address` set to it, so the Worker can only ever email that one address.
+  - The PR preview has the same binding, so a test inquiry sent from the preview link really arrives.
+  - If an inquiry doesn't arrive, look in Cloudflare → Workers → `galfrankstudio-website` → Logs for "contact form send failed" and its error code (e.g. `E_SENDER_DOMAIN_NOT_AVAILABLE` means galfrank.com isn't onboarded to Email Service / Email Routing).
 - If spam shows up: add Cloudflare Turnstile.
 - Tests: `node --test` (repo root) runs `tests/worker.test.mjs`.
 
