@@ -70,6 +70,9 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
 - The page shows "Message received" only when the Worker answers `{ ok: true }`. Otherwise (not configured, error, 12 s timeout) it offers WhatsApp with all the details.
 - **Switched on (2026-10-06):** `GalFrankStudio@gmail.com` is a verified Email Routing destination, and the `send_email` binding in `wrangler.jsonc` is enabled with `destination_address` set to it, so the Worker can only ever email that one address.
   - The PR preview has its own copy of the vars and binding (`previews` block), so a test inquiry sent from the preview link really arrives. (The first try failed because the preview had neither.)
+  - **Keep the address lowercase** (`galfrankstudio@gmail.com`). With "GalFrankStudio@…" Cloudflare refused the send as `E_RECIPIENT_NOT_ALLOWED` ("destination address is not a verified address"); the Worker also lowercases it before sending.
+  - On `*.workers.dev` test addresses the failure panel shows a small "test info" line (HTTP status, Cloudflare's error code). It never shows on galfrank.com. The Worker's 503/502 answers carry the same reason.
+  - Verified end to end on the preview 2026-10-06: API answered `{ok:true}` and the real form showed "נשלח!".
   - If an inquiry doesn't arrive, look in Cloudflare → Workers → `galfrankstudio-website` → Logs for "contact form send failed" and its error code (e.g. `E_SENDER_DOMAIN_NOT_AVAILABLE` means galfrank.com isn't onboarded to Email Service / Email Routing).
 - If spam shows up: add Cloudflare Turnstile.
 - Tests: `node --test` (repo root) runs `tests/worker.test.mjs`.
