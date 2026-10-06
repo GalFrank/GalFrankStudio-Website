@@ -4,4 +4,5 @@ Source for [galfrank.com](https://galfrank.com) — video editing, motion graphi
 
 - Single self-contained page: `index.html` (Hebrew/English, RTL-aware).
 - Content lives in the `CONFIG` block near the top of the `<script>`: contact details, showreel, client logos list, and portfolio projects (YouTube link, length, category).
-- Hosted on Netlify; every push to `main` deploys automatically.
+- Hosted on Cloudflare Workers (static assets, see `wrangler.jsonc`); every push to `main` deploys automatically. Files listed in `.assetsignore` are not published.
+- Status and to-do list: `TODO.md`.
