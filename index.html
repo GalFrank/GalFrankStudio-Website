@@ -944,9 +944,10 @@ let booted = false;
 function fitHeadline() {
   const h = document.querySelector(".hero h1"); if (!h) return;
   h.style.fontSize = "";
-  const max = parseFloat(getComputedStyle(h).fontSize), avail = h.parentElement.clientWidth;
+  /* measure the h1 itself: on mobile its wrapper is display:contents and reports 0 width */
+  const max = parseFloat(getComputedStyle(h).fontSize), avail = h.clientWidth;
   const widest = Math.max(...[...h.querySelectorAll(".w")].map((l) => l.scrollWidth));
-  if (widest > avail) h.style.fontSize = Math.floor(max * avail / widest * 0.98) + "px";
+  if (avail > 0 && widest > avail) h.style.fontSize = Math.floor(max * avail / widest * 0.98) + "px";
 }
 addEventListener("resize", fitHeadline);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitHeadline);
