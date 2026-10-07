@@ -78,7 +78,7 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
 - Tests: `node --test` (repo root) runs `tests/worker.test.mjs`.
 
 ### B. Speed and layout jump
-- **Move the images out of index.html.** Done for the portrait (2026-10-06): the new photo, cut out of its studio background locally, is `img/gal-640.webp` / `gal-960.webp` / `gal-1280.webp` (35 / 72 / 109 KB, `srcset`; the 1280 one is the source photo's full resolution). For more detail than the source has, upscale the original first (Magnific "Precision photo" 2x was the plan; its upload host `ak-data.magnific.com` must be allowed in the cloud environment's network settings). Still to do: the `const LOGOS = {…}` block is ~135 KB: 9 single-colour PNG masks plus an Isuzu SVG.
+- **Move the images out of index.html.** Done for the portrait (2026-10-06): the new photo, cut out of its studio background locally, is `img/gal-640.webp` / `gal-960.webp` / `gal-1280.webp` (37 / 82 / 134 KB, `srcset`). They come from a 2x Magnific "Precision photo" upscale of the original (most faithful mode, 180 credits, 2026-10-07; 2562×2454), cut out locally with rembg. Magnific needs `*.magnific.com` (upload) and `*.cdnpk.net` (results) in the cloud environment's allowed domains. Still to do: the `const LOGOS = {…}` block is ~135 KB: 9 single-colour PNG masks plus an Isuzu SVG.
   - Logos as lossless WebP measured 95 KB → 54 KB.
   - CSS `mask-image` needs same-origin URLs: fine on Cloudflare, but it fails when opening the file locally via file://.
 - **Self-host the fonts.** The Google Fonts CSS blocks first paint (~1.5 s on slow mobile). Only Hebrew and Latin subsets are needed:
