@@ -34,6 +34,7 @@ Last updated 2026-10-06. Keep this file current: tick items off and add new find
     - If the browser refuses to start a video with sound (possible on iPhone), after 4 s the frame hands taps straight to YouTube's own play button.
   - The contact form posts to `/api/contact` (`worker/index.js`), which emails the owner. Email sending was switched on 2026-10-06, after the owner verified the Gmail address in Email Routing (see 3A). After sending, the form says "נשלח!" / "Done!" and offers to send the same details on WhatsApp too; if sending fails, it says "כמעט שם" and WhatsApp is the way to send them.
   - New Hebrew hero subtitle.
+  - Visitor stats in Mixpanel (2026-10-07), see 3I.
 
 ## 1. Domain move (done 2026-10-06)
 
@@ -118,7 +119,7 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
   - `robots.txt` and `sitemap.xml` (update `lastmod` on big content changes).
   - Real icon files: `favicon.ico` (16/32/48), `favicon.svg`, `apple-touch-icon.png` (180), `img/icon-512.png` (JSON-LD logo).
   - `theme-color` for light and dark.
-- After the domain move: optionally verify in Google Search Console and submit the sitemap.
+- **Needs the owner:** verify galfrank.com in Google Search Console (Domain property; Cloudflare can add the DNS record) and submit `https://galfrank.com/sitemap.xml`. There is no Search Console connector for Claude, so share reports as screenshots or exports.
 
 ### F. Cloudflare and repo
 - Done (2026-10-06):
@@ -132,8 +133,24 @@ Baseline (Lighthouse on a local server): performance 73 mobile / 90 desktop, acc
 - The reel code talks to the player only through `reel.player` (play, pause, seek, mute, current time), so swapping in a native video means a small adapter.
 
 ### H. Ask the owner first
-- Visitor stats: Cloudflare Web Analytics is free and easy now that the site is on Cloudflare.
 - Copy voice mixes "I" (About) and "we" (services, contact). Keep it, or unify?
+
+### I. Visitor stats: Mixpanel (done 2026-10-07)
+- Mixpanel project "GalFrankStudio" (id 4071099). **Its data lives in Mixpanel's EU region**, so `index.html` sends to `api-eu.mixpanel.com`. The token is `CONFIG.mixpanel` (public by design; `""` turns stats off).
+- Reading the data from Claude needs the EU MCP server, `https://mcp-eu.mixpanel.com/mcp`, added as a custom connector. The directory's Mixpanel connector talks to the US server and is refused for this project.
+- The library (Mixpanel's own snippet, `cdn.mxpnl.com`) loads after the page's `load` event, or after 4 s at most. Storage is localStorage, no cookies. Nothing is loaded on localhost or `file:`.
+- Every event has `lang` and `site` (`live` on galfrank.com, `preview` on workers.dev). Filter on `site = live` for real visitors.
+- Events:
+  - `$mp_web_page_view`
+  - `Section Viewed` {section}: once per visit, when the section's top passes mid-screen
+  - `Showreel Sound On` {at}, `Showreel Finished` (a full pass with sound)
+  - `Project Play` / `Project Finished` {project (English title), client, category}
+  - `Work Filter` {category}
+  - `Contact Form Sent` {emailed, project_type, budget} (never the name, phone, email or message)
+  - `Contact Click` {channel: WhatsApp/Email/Instagram/Phone, where}
+  - `Language Switch` {from, to}
+- `?notrack` on any page stops counting that browser (for the owner's own visits); `?track` undoes it.
+- Possible later: proxy `/api/mp` through the Worker so ad blockers don't drop events.
 
 ## How Claude should test changes
 

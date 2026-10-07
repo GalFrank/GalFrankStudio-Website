@@ -5,6 +5,7 @@ Portfolio site for Gal Frank Studio (video editing, motion graphics, AI content)
 - **Start with `TODO.md`.** It has the current status, the domain/email plan and the prioritized improvement list. Update it as work lands.
 - **The site is `index.html`:** Hebrew/English, RTL-aware, with inline CSS and JS.
   - Content lives in the `CONFIG` block (contact details, showreel, client logos, projects) and the `T` translations object.
+  - Visitor stats go to Mixpanel's EU region (`track()`, `initStats()`; events listed in TODO.md 3I).
   - Videos use the YouTube IFrame API: the hero reel (`reel` controller) and in-place project players (`playProject`, `proj`). Both hide YouTube's controls and use the site's own.
 - **`worker/index.js`** is a Cloudflare Worker for `POST /api/contact`. It emails contact-form inquiries through the `send_email` binding in `wrangler.jsonc`. Tests: `node --test` from the repo root.
 - **Other site files:** `404.html` (served for unknown addresses), `img/`, the icons (`favicon.ico`, `favicon.svg`, `apple-touch-icon.png`), `robots.txt`, `sitemap.xml`, and `_headers` (response headers; Cloudflare reads it, doesn't serve it).
