@@ -856,6 +856,7 @@ const CONFIG = {
   instagram: "galfrankstudio",      // without the @
   showreel: "https://youtu.be/o4o1LXvFJ8A",   // YouTube link; plays muted in the hero, a click turns the sound on. The hero frame is 5:4 to match it (.viewer aspect-ratio)
   formEndpoint: "/api/contact",      // the site's own Cloudflare Worker (worker/index.js) emails each inquiry; if it fails, visitors get the WhatsApp option
+  mixpanel: "d62c7f35fb49554cf8a86177945fe81f",   // visitor stats: the Mixpanel project token (public by design; data is in Mixpanel's EU region). "" = no stats
   clients: [{"key": "elal", "name": "EL AL"}, {"key": "intel", "name": "Intel"}, {"key": "leumit", "name": "Leumit"}, {"key": "adidas", "name": "adidas"}, {"key": "bezeq", "name": "Bezeq"}, {"key": "bayer", "name": "Bayer"}, {"key": "shufersal", "name": "Shufersal"}, {"key": "amdocs", "name": "Amdocs"}, {"key": "chery", "name": "Chery"}, {"key": "isuzu", "name": "Isuzu"}],
   // Projects: yt = YouTube link. cat = commercial | corporate | motion | social. dur is optional ("0:30").
   // ar = the video's shape when it isn't the usual 16:9 (e.g. "4/5", "9/16"), so the player fits it without YouTube's interface.
@@ -1141,8 +1142,9 @@ const mmss = (s) => Math.floor(s / 60) + ":" + pad(Math.floor(s % 60));
 const projCard = () => { const c = $("#featWrap .feature"); return c && c.classList.contains("playing") ? c : null; };
 function playProject(i) {
   const p = CONFIG.projects[i], id = ytId(p.yt), card = $("#featWrap .feature");
-  if (!id || ytFailed) { if (p.yt || p.url) window.open(p.yt || p.url, "_blank", "noopener"); return; }
+  if (!id || ytFailed) { track("Project Play", Object.assign(projStats(p), { on: "youtube" })); if (p.yt || p.url) window.open(p.yt || p.url, "_blank", "noopener"); return; }
   if (!card || (proj.idx === i && card.classList.contains("playing"))) return;
+  track("Project Play", projStats(p));
   stopProject();
   Object.assign(proj, { idx: i, ready: false, started: false, state: -1, dur: durSecs(p.dur), muted: false, base: 0, baseAt: 0, scrubT: null });
   card.classList.add("playing", "wait"); card.style.transform = "";
@@ -1178,7 +1180,7 @@ function playProject(i) {
 function onProjState(e) {
   const card = projCard(); if (!card || e.target !== proj.player) return;
   proj.state = e.data;
-  if (e.data === 0) { stopProject(); return; }
+  if (e.data === 0) { track("Project Finished", projStats(CONFIG.projects[proj.idx])); stopProject(); return; }
   if (e.data === 1) {
     proj.started = true; clearTimeout(proj.watchdog); claimAudio(projectAudio);
     /* started from YouTube's own play button: it's already on screen, so switch to the site's controls at once */
@@ -1284,6 +1286,7 @@ function toggleFullscreen(el) {
 }
 
 function setLang(l) {
+  if (booted && l !== lang) track("Language Switch", { from: lang, to: l });
   lang = l;
   document.documentElement.lang = l;
   document.documentElement.dir = l === "he" ? "rtl" : "ltr";
@@ -1353,6 +1356,7 @@ async function onSubmit(e) {
   const delivered = await exportAnim(sent);
   lastSummary = summary;
   doneKind = delivered ? "ok" : "wa";
+  track("Contact Form Sent", { emailed: delivered, project_type: T.en.types[$("#f-type").selectedIndex], budget: T.en.budgets[$("#f-budget").selectedIndex] });
   $("#form").hidden = true; $("#done").hidden = false;
   renderDone();
   $("#doneTitle").focus();
@@ -1479,6 +1483,7 @@ function startReelPreview() {
 /* sound comes on right where the muted loop is: no seek, so no wait for YouTube to buffer the start again.
    It then plays through, goes round once more if it started mid-reel, and drops back to the muted loop. */
 function startReelSound() {
+  if (reel.mode !== "sound") track("Showreel Sound On", { at: Math.round(reelTime()) });
   if (!reel.id || ytFailed || reel.failed) return window.open(CONFIG.showreel, "_blank", "noopener");
   if (!reel.ready) { reel.waiting = true; setReelMode("sound"); return ensureReel("sound"); }
   claimAudio(reelAudio);
@@ -1515,6 +1520,7 @@ function reelLoop() {
   reel.player.seekTo(0, true); reel.base = 0; reel.baseAt = now;
   if (reel.mode !== "sound") return;
   if (reel.soundFrom > 2 && !reel.wrapped) { reel.wrapped = true; return; }
+  track("Showreel Finished");
   reel.player.mute(); setReelMode("preview"); if (audioOwner === reelAudio) audioOwner = null;
 }
 /* YouTube reports time in steps; interpolate between reports so the timecode counts every frame */
@@ -1719,10 +1725,68 @@ function initInteractions() {
   });
 }
 
+/* ===================== VISITOR STATS (Mixpanel) =====================
+   The project's data is kept in Mixpanel's EU region, so events go to api-eu.mixpanel.com.
+   The library loads after the page has, so it never slows it down. Nothing is sent from localhost (testing).
+   Preview links (workers.dev) are counted too, marked site = "preview"; filter on site = "live" for real visitors.
+   Open any page with ?notrack to stop counting this browser (e.g. your own visits), ?track to count it again.
+   The contact form's contents are never sent: only the kind of project and budget picked. */
+const statsQueue = [];
+let statsOn = false;
+function track(event, props) {
+  if (!statsOn) return;
+  const p = Object.assign({ lang }, props);
+  try { window.mixpanel ? window.mixpanel.track(event, p) : statsQueue.push([event, p]); } catch (e) {}
+}
+function initStats() {
+  const host = location.hostname;
+  if (!CONFIG.mixpanel || location.protocol === "file:" || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(host)) return;
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.has("notrack")) localStorage.setItem("gf-notrack", "1");
+    if (q.has("track")) localStorage.removeItem("gf-notrack");
+    if (q.has("notrack") || q.has("track")) { q.delete("notrack"); q.delete("track"); history.replaceState(null, "", location.pathname + (String(q) ? "?" + q : "") + location.hash); }
+    if (localStorage.getItem("gf-notrack")) return;
+  } catch (e) {}
+  statsOn = true;
+  let loaded = false;
+  const load = () => {
+    if (loaded) return; loaded = true;
+    /* Mixpanel's own loader snippet, unchanged (mixpanel-browser 2.84) */
+    (function(e,c){if(!c.__SV){var l,h;window.mixpanel=c;c._i=[];c.init=function(q,r,f){function t(d,a){var g=a.split(".");2==g.length&&(d=d[g[0]],a=g[1]);d[a]=function(){d.push([a].concat(Array.prototype.slice.call(arguments,0)))}}var b=c;"undefined"!==typeof f?b=c[f]=[]:f="mixpanel";b.people=b.people||[];b.toString=function(d){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);d||(a+=" (stub)");return a};b.people.toString=function(){return b.toString(1)+".people (stub)"};l="disable time_event track track_pageview track_links track_forms track_with_groups add_group set_group remove_group register register_once alias unregister identify name_tag set_config reset opt_in_tracking opt_out_tracking has_opted_in_tracking has_opted_out_tracking clear_opt_in_out_tracking start_batch_senders start_session_recording stop_session_recording people.set people.set_once people.unset people.increment people.append people.union people.track_charge people.clear_charges people.delete_user people.remove".split(" ");
+    for(h=0;h<l.length;h++)t(b,l[h]);var n="set set_once union unset remove delete".split(" ");b.get_group=function(){function d(p){a[p]=function(){b.push([g,[p].concat(Array.prototype.slice.call(arguments,0))])}}for(var a={},g=["get_group"].concat(Array.prototype.slice.call(arguments,0)),m=0;m<n.length;m++)d(n[m]);return a};c._i.push([q,r,f])};c.__SV=1.2;var k=e.createElement("script");k.type="text/javascript";k.async=!0;k.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===
+    e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";e=e.getElementsByTagName("script")[0];e.parentNode.insertBefore(k,e)}})(document,window.mixpanel||[]);
+    const mp = window.mixpanel;
+    mp.init(CONFIG.mixpanel, { api_host: "https://api-eu.mixpanel.com", persistence: "localStorage", track_pageview: false });
+    mp.register({ site: /(^|\.)galfrank\.com$/.test(host) ? "live" : "preview" });
+    mp.track_pageview({ lang });
+    statsQueue.splice(0).forEach(([event, p]) => mp.track(event, p));
+  };
+  addEventListener("load", () => setTimeout(load, 0), { once: true });
+  setTimeout(load, 4000);   // don't wait forever for a slow page: a quick visit should still count
+  /* how far down people get: each section once per visit, when its top passes the middle of the screen */
+  if ("IntersectionObserver" in window) {
+    const seen = new IntersectionObserver((list) => list.forEach((en) => {
+      if (en.isIntersecting) { seen.unobserve(en.target); track("Section Viewed", { section: en.target.id }); }
+    }), { rootMargin: "0px 0px -50% 0px" });
+    document.querySelectorAll("#main section[id]:not(#top)").forEach((el) => seen.observe(el));
+  }
+}
+const projStats = (p) => ({ project: p.en, client: p.client || "", category: p.cat });
+/* contact links, wherever they are on the page */
+document.addEventListener("click", (e) => {
+  const a = e.target.closest("a[href]"); if (!a) return;
+  const href = a.getAttribute("href"), kind = /wa\.me\//.test(href) ? "WhatsApp" : /^mailto:/.test(href) ? "Email" : /instagram\.com/.test(href) ? "Instagram" : /^tel:/.test(href) ? "Phone" : "";
+  if (!kind) return;
+  const where = a.closest("#waFab") ? "floating button" : a.closest("#done") ? "after form" : a.closest("#direct") ? "contact section"
+    : a.closest("#mnav") ? "menu" : a.closest("footer") ? "footer" : (a.closest("section[id]") || {}).id || "page";
+  track("Contact Click", { channel: kind, where });
+}, true);
+
 /* events */
 document.addEventListener("click", (e) => {
   const chip = e.target.closest("[data-cat]");
-  if (chip) { filter = chip.dataset.cat; document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", c === chip)); renderGrid(); return; }
+  if (chip) { filter = chip.dataset.cat; track("Work Filter", { category: filter }); document.querySelectorAll(".chip").forEach((c) => c.setAttribute("aria-pressed", c === chip)); renderGrid(); return; }
   const rb = e.target.closest("[data-reel]");
   if (rb) {
     const a = rb.dataset.reel;
@@ -1775,6 +1839,7 @@ try { initial = localStorage.getItem("gf-lang") || "he"; } catch (e) {}
 if (location.hash === "#en") initial = "en";
 setLang(initial);
 booted = true;
+initStats();
 initReel();
 initProjControls();
 initInteractions();
